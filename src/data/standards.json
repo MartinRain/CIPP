@@ -28,6 +28,38 @@
     "recommendedBy": ["LKB360"]
   },
   {
+    "name": "standards.EntraDeviceJoinScope",
+    "cat": "Entra (AAD) Standards",
+    "tag": [],
+    "helpText": "Configures which users are allowed to join devices to Microsoft Entra ID.",
+    "docsDescription": "Configures the Microsoft Entra device registration policy to allow all users, no users, or only members of a selected security group to join devices to Microsoft Entra ID.",
+    "executiveText": "Controls who can join devices to Microsoft Entra ID, helping reduce unauthorized workstation onboarding.",
+    "addedComponent": [
+      {
+        "name": "standards.EntraDeviceJoinScope.appliesTo",
+        "label": "Entra device join scope?",
+        "type": "radio",
+        "options": [
+          { "label": "All", "value": "all" },
+          { "label": "None", "value": "none" },
+          { "label": "Custom Group", "value": "selected" }
+        ]
+      },
+      {
+        "type": "textField",
+        "name": "standards.EntraDeviceJoinScope.customGroup",
+        "label": "Custom Group Name",
+        "required": false
+      }
+    ],
+    "label": "Configure Entra device join scope",
+    "impact": "Medium Impact",
+    "impactColour": "warning",
+    "addedDate": "2026-05-06",
+    "powershellEquivalent": "Update-MgBetaPolicyDeviceRegistrationPolicy",
+    "recommendedBy": ["LKB360"]
+  },
+  {
     "name": "standards.MailContacts",
     "cat": "Global Standards",
     "tag": [],
