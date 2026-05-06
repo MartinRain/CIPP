@@ -1,13 +1,26 @@
 [
   {
-    "name": "standards.CreateLKB360TechUser",
+    "name": "standards.CreateDisabledUser",
     "cat": "Entra (AAD) Standards",
     "tag": [],
-    "helpText": "Creates the LKB360 technician account used only for Entra ID device join and workstation provisioning.",
-    "docsDescription": "Creates a standard lkb360-tech user in the tenant without assigning licenses or admin roles. The account is intended only for Entra ID device join and workstation provisioning.",
-    "executiveText": "Creates a controlled technician provisioning account for workstation setup without granting standing administrator access.",
-    "addedComponent": [],
-    "label": "Create LKB360 Tech device join user",
+    "helpText": "Creates a disabled cloud-only user account using the tenant's initial onmicrosoft.com domain. No licenses or admin roles are assigned.",
+    "docsDescription": "Creates a disabled cloud-only Microsoft Entra ID user account using the tenant's initial onmicrosoft.com domain. This standard requires a display name and username/UPN prefix. The account is created without licenses or administrator roles and is immediately disabled.",
+    "executiveText": "Creates a standardized disabled cloud user account without granting access, licenses, or standing administrator privileges.",
+    "addedComponent": [
+      {
+        "type": "textField",
+        "name": "standards.CreateDisabledUser.DisplayName",
+        "label": "Display name",
+        "required": true
+      },
+      {
+        "type": "textField",
+        "name": "standards.CreateDisabledUser.Username",
+        "label": "Username / UPN prefix",
+        "required": true
+      }
+    ],
+    "label": "Create disabled cloud user",
     "impact": "Low Impact",
     "impactColour": "info",
     "addedDate": "2026-05-06",
