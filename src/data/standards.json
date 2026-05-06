@@ -60,6 +60,34 @@
     "recommendedBy": ["LKB360"]
   },
   {
+    "name": "standards.AddUserToGroup",
+    "cat": "Entra (AAD) Standards",
+    "tag": [],
+    "helpText": "Adds a cloud user to a security group by username/UPN prefix and group display name.",
+    "docsDescription": "Adds a Microsoft Entra ID user to a security group. The user is located by username/UPN prefix and the group is located by display name. The standard is idempotent and will not duplicate membership if the user is already a member.",
+    "executiveText": "Ensures a specific user account is a member of a required security group for controlled access scenarios.",
+    "addedComponent": [
+      {
+        "type": "textField",
+        "name": "standards.AddUserToGroup.Username",
+        "label": "Username / UPN prefix",
+        "required": true
+      },
+      {
+        "type": "textField",
+        "name": "standards.AddUserToGroup.GroupDisplayName",
+        "label": "Group display name",
+        "required": true
+      }
+    ],
+    "label": "Add user to group",
+    "impact": "Low Impact",
+    "impactColour": "info",
+    "addedDate": "2026-05-06",
+    "powershellEquivalent": "New-MgGroupMember",
+    "recommendedBy": ["LKB360"]
+  },
+  {
     "name": "standards.MailContacts",
     "cat": "Global Standards",
     "tag": [],
