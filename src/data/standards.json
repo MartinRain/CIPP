@@ -1,5 +1,20 @@
 [
   {
+    "name": "standards.CreateLKB360TechUser",
+    "cat": "Entra (AAD) Standards",
+    "tag": [],
+    "helpText": "Creates the LKB360 technician account used only for Entra ID device join and workstation provisioning.",
+    "docsDescription": "Creates a standard lkb360-tech user in the tenant without assigning licenses or admin roles. The account is intended only for Entra ID device join and workstation provisioning.",
+    "executiveText": "Creates a controlled technician provisioning account for workstation setup without granting standing administrator access.",
+    "addedComponent": [],
+    "label": "Create LKB360 Tech device join user",
+    "impact": "Low Impact",
+    "impactColour": "info",
+    "addedDate": "2026-05-06",
+    "powershellEquivalent": "New-MgUser",
+    "recommendedBy": ["LKB360"]
+  },
+  {
     "name": "standards.MailContacts",
     "cat": "Global Standards",
     "tag": [],
