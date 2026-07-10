@@ -1,10 +1,8 @@
 import { Box, Card, CardHeader, CardContent, Typography, Divider, Skeleton } from "@mui/material";
 import { CardMembership as CardMembershipIcon } from "@mui/icons-material";
 import { CippSankey } from "./CippSankey";
-import { useRouter } from "next/router";
 
 export const LicenseCard = ({ data, isLoading }) => {
-  const router = useRouter();
   const processData = () => {
     if (!data || !Array.isArray(data) || data.length === 0) {
       return null;
@@ -21,7 +19,6 @@ export const LicenseCard = ({ data, isLoading }) => {
 
     const nodes = [];
     const links = [];
-    const licenseLookup = {};
 
     topLicenses.forEach((license, index) => {
       if (license) {
@@ -33,33 +30,22 @@ export const LicenseCard = ({ data, isLoading }) => {
         const assigned = parseInt(license?.CountUsed || 0) || 0;
         const available = parseInt(license?.CountAvailable || 0) || 0;
 
-        // Use the index to keep node ids unique even when two licenses truncate
-        // to the same shortName; the visible label stays the truncated name.
-        const nodeId = `${index}-${shortName}`;
-        const assignedId = `${nodeId} - Assigned`;
-        const availableId = `${nodeId} - Available`;
-
         nodes.push({
-          id: nodeId,
-          label: shortName,
+          id: shortName,
           nodeColor: `hsl(${210 + index * 30}, 70%, 50%)`,
         });
 
-        // Map every node id back to the full license name so a click can filter
-        // the report on the real License value.
-        licenseLookup[nodeId] = licenseName;
-        licenseLookup[assignedId] = licenseName;
-        licenseLookup[availableId] = licenseName;
+        const assignedId = `${shortName} - Assigned`;
+        const availableId = `${shortName} - Available`;
 
         if (assigned > 0) {
           nodes.push({
             id: assignedId,
-            label: `${shortName} - Assigned`,
             nodeColor: "hsl(99, 70%, 50%)",
           });
 
           links.push({
-            source: nodeId,
+            source: shortName,
             target: assignedId,
             value: assigned,
           });
@@ -68,12 +54,11 @@ export const LicenseCard = ({ data, isLoading }) => {
         if (available > 0) {
           nodes.push({
             id: availableId,
-            label: `${shortName} - Available`,
             nodeColor: "hsl(28, 100%, 53%)",
           });
 
           links.push({
-            source: nodeId,
+            source: shortName,
             target: availableId,
             value: available,
           });
@@ -85,29 +70,10 @@ export const LicenseCard = ({ data, isLoading }) => {
       return null;
     }
 
-    return { nodes, links, licenseLookup };
+    return { nodes, links };
   };
 
   const processedData = processData();
-
-  const navigateToLicense = (nodeId) => {
-    const fullName = processedData?.licenseLookup?.[nodeId];
-    if (!fullName) {
-      return;
-    }
-    router.push({
-      pathname: "/tenant/reports/list-licenses",
-      query: { filters: JSON.stringify([{ id: "License", value: fullName }]) },
-    });
-  };
-
-  const handleNodeClick = (node) => {
-    navigateToLicense(node?.id);
-  };
-
-  const handleLinkClick = (link) => {
-    navigateToLicense(link?.source?.id ?? link?.source);
-  };
 
   const calculateStats = () => {
     if (!data || !Array.isArray(data)) {
@@ -127,17 +93,7 @@ export const LicenseCard = ({ data, isLoading }) => {
     <Card sx={{ flex: 1, height: '100%' }}>
       <CardHeader
         title={
-          <Box
-            onClick={() => router.push("/tenant/reports/list-licenses")}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              width: "fit-content",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <CardMembershipIcon sx={{ fontSize: 24 }} />
             <Typography variant="h6">License Overview</Typography>
           </Box>
@@ -149,11 +105,7 @@ export const LicenseCard = ({ data, isLoading }) => {
           {isLoading ? (
             <Skeleton variant="rectangular" width="100%" height={300} />
           ) : processedData ? (
-            <CippSankey
-              data={{ nodes: processedData.nodes, links: processedData.links }}
-              onNodeClick={handleNodeClick}
-              onLinkClick={handleLinkClick}
-            />
+            <CippSankey data={{ nodes: processedData.nodes, links: processedData.links }} />
           ) : (
             <Box
               sx={{

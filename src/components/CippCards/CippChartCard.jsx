@@ -43,9 +43,6 @@ const useChartOptions = (labels, chartType) => {
     },
 
     xaxis: {
-      // Categories drive the bar/line axis labels and the tooltip title. Without this, a bar
-      // chart's tooltip falls back to the auto series name ("series-1") instead of the label.
-      categories: labels,
       labels: {
         show: true,
         rotate: 0,
@@ -60,11 +57,6 @@ const useChartOptions = (labels, chartType) => {
       show: false,
     },
     plotOptions: {
-      // distributed colors each bar (data point) from the colors array so a single-series bar
-      // chart keeps the per-item colors, and the tooltip shows the category name per bar.
-      bar: {
-        distributed: true,
-      },
       pie: {
         expandOnClick: false,
       },
@@ -100,7 +92,6 @@ export const CippChartCard = ({
   chartType = "donut",
   title,
   actions,
-  headerAction,
   onClick,
   totalLabel = "Total",
   customTotal,
@@ -113,15 +104,16 @@ export const CippChartCard = ({
   const total = customTotal !== undefined ? customTotal : calculatedTotal;
   useEffect(() => {
     if (chartType === "bar") {
-      // Single named series with the labels supplied via xaxis.categories. This keeps the tooltip
-      // title tied to the category (e.g. the site name) instead of an auto "series-1" name.
-      setBarSeries([{ name: totalLabel, data: chartSeries }]);
+      setBarSeries(
+        labels.map((label, index) => ({
+          data: [{ x: label, y: chartSeries[index] }],
+        }))
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartType, chartSeries.join(","), labels.join(","), totalLabel]);
+  }, [chartType, chartSeries.length, labels]);
 
   return (
-    <Card
+    <Card 
       style={{ width: "100%", height: "100%" }}
       onClick={onClick}
       sx={{
@@ -135,9 +127,7 @@ export const CippChartCard = ({
     >
       <CardHeader
         action={
-          headerAction ? (
-            headerAction
-          ) : actions ? (
+          actions ? (
             <ActionsMenu
               color="inherit"
               actions={actions}
@@ -198,9 +188,7 @@ export const CippChartCard = ({
                       <Stack alignItems="center" direction="row" spacing={1} sx={{ flexGrow: 1 }}>
                         <Box
                           sx={{
-                            // Match ApexCharts' color cycling so the dot lines up with its bar/slice.
-                            backgroundColor:
-                              chartOptions.colors[index % chartOptions.colors.length],
+                            backgroundColor: chartOptions.colors[index],
                             borderRadius: "50%",
                             height: 8,
                             width: 8,

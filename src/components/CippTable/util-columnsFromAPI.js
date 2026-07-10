@@ -2,7 +2,8 @@ import { getCippFilterVariant } from '../../utils/get-cipp-filter-variant'
 import { getCippFormatting } from '../../utils/get-cipp-formatting'
 import { getCippTranslation } from '../../utils/get-cipp-translation'
 import { getCippColumnSize } from '../../utils/get-cipp-column-size'
-import { SKIP_RECURSION_KEYS as skipRecursion } from '../../utils/skip-recursion-keys'
+
+const skipRecursion = ['location', 'ScheduledBackupValues', 'Tenant']
 
 // Number of rows to sample when measuring column content width.
 const MAX_SIZE_SAMPLE = 30
@@ -35,12 +36,7 @@ const TIME_AGO_NAMES = new Set([
   'requestDate', 'reviewedDate', 'GeneratedAt',
 ])
 const MATCH_DATE_TIME = /([dD]ate[tT]ime|[Ee]xpiration|[Tt]imestamp|[sS]tart[Dd]ate)/
-const ABSOLUTE_DATE_NAMES = new Set([
-  'WindowStart', 'WindowEnd', 'CreatedUtc', 'DownloadedUtc', 'ProcessedUtc',
-  'NextAttemptUtc', 'LastErrorUtc', 'LastPolledUtc',
-])
-const isDateTimeColumn = (key) =>
-  TIME_AGO_NAMES.has(key) || ABSOLUTE_DATE_NAMES.has(key) || MATCH_DATE_TIME.test(key)
+const isDateTimeColumn = (key) => TIME_AGO_NAMES.has(key) || MATCH_DATE_TIME.test(key)
 
 // Measure the pixel width a column needs based on its header and sampled cell values.
 // rawValues are the original data values (before formatting) — if they contain arrays or

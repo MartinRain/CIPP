@@ -177,13 +177,33 @@ const CippBrandingSettings = () => {
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: "bold" }}>
             Brand Color
           </Typography>
-          <CippFormComponent
-            type="colorPicker"
-            name="colour"
-            formControl={formControl}
-            label="Hex Color"
-            sx={{ width: "120px" }}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <input
+              type="color"
+              value={formControl.watch("colour") || "#F77F00"}
+              onChange={(e) => formControl.setValue("colour", e.target.value)}
+              style={{
+                width: "50px",
+                height: "40px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            />
+            <CippFormComponent
+              type="textField"
+              name="colour"
+              formControl={formControl}
+              label="Hex Color"
+              sx={{ width: "120px" }}
+              validators={{
+                pattern: {
+                  value: /^#[0-9A-F]{6}$/i,
+                  message: "Please enter a valid hex color (e.g., #F77F00)",
+                },
+              }}
+            />
+          </Box>
           <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: "block" }}>
             This color will be used for accents and highlights in reports
           </Typography>

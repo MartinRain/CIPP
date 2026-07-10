@@ -210,17 +210,7 @@ export const MFACard = ({ data, isLoading }) => {
     <Card sx={{ flex: 1, height: "100%" }}>
       <CardHeader
         title={
-          <Box
-            onClick={() => router.push("/identity/reports/mfa-report")}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-              width: "fit-content",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <UserIcon sx={{ fontSize: 24 }} />
             <Typography variant="h6">User authentication</Typography>
           </Box>

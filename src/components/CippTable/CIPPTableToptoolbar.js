@@ -762,7 +762,7 @@ export const CIPPTableToptoolbar = React.memo(
             <ModernSearchContainer elevation={0}>
               <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
               <ModernSearchInput
-                placeholder="Search..."
+                placeholder="Search input"
                 value={searchValue}
                 onChange={handleSearchChange}
               />

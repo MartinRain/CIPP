@@ -34,7 +34,6 @@ const Page = () => {
     extendedInfoFields: [
       'createdDateTime',
       'displayName',
-      'description',
       'lastModifiedDateTime',
       'PolicyTypeName',
     ],
@@ -52,6 +51,7 @@ const Page = () => {
     'description',
     'lastModifiedDateTime',
   ]
+
 
   return (
     <>

@@ -124,7 +124,7 @@ export const nativeMenuItems = [
             permissions: ['Identity.User.*'],
           },
           {
-            title: 'Microsoft Entra Connect Report',
+            title: 'AAD Connect Report',
             path: '/identity/reports/azure-ad-connect-report',
             permissions: ['Identity.User.*'],
           },
@@ -285,11 +285,6 @@ export const nativeMenuItems = [
             path: '/tenant/reports/graph-office-reports',
             permissions: ['Tenant.Reports.*'],
           },
-          {
-            title: 'Custom Test Report',
-            path: '/tenant/reports/custom-test-report',
-            permissions: ['Tenant.Reports.*'],
-          },
         ],
       },
       {
@@ -363,11 +358,6 @@ export const nativeMenuItems = [
             path: '/security/defender/list-defender-tvm',
             permissions: ['Security.Alert.*'],
           },
-          {
-            title: 'CVE Management',
-            path: '/security/defender/defender-cve-exceptions',
-            permissions: ['Security.Alert.*'],
-          },
         ],
       },
       {
@@ -382,11 +372,6 @@ export const nativeMenuItems = [
           {
             title: 'MDE Onboarding',
             path: '/security/reports/mde-onboarding',
-            permissions: ['Security.Defender.*'],
-          },
-          {
-            title: 'Vulnerability Report',
-            path: '/security/reports/cve-report',
             permissions: ['Security.Defender.*'],
           },
         ],
@@ -553,7 +538,6 @@ export const nativeMenuItems = [
             title: 'Application Templates',
             path: '/endpoint/applications/templates',
             permissions: ['Endpoint.Application.*'],
-            scope: 'global',
           },
         ],
       },
@@ -695,21 +679,6 @@ export const nativeMenuItems = [
         title: 'SharePoint',
         path: '/teams-share/sharepoint',
         permissions: ['Sharepoint.Admin.*'],
-      },
-      {
-        title: 'Deleted Sites',
-        path: '/teams-share/deleted-sites',
-        permissions: ['Sharepoint.Admin.*'],
-      },
-      {
-        title: 'Sharing Report',
-        path: '/teams-share/sharing-report',
-        permissions: ['Sharepoint.Site.*'],
-      },
-      {
-        title: 'External Users',
-        path: '/teams-share/external-users',
-        permissions: ['Sharepoint.Site.*'],
       },
       {
         title: 'Teams',

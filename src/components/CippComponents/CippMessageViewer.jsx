@@ -16,10 +16,6 @@ import {
   DialogContent,
   IconButton,
   Tooltip,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Collapse,
 } from "@mui/material";
 import { Box, Grid, Stack, ThemeProvider } from "@mui/system";
 import { createTheme } from "@mui/material/styles";
@@ -41,8 +37,6 @@ import {
   AccountCircle,
   Close,
   ReceiptLong,
-  ExpandLess,
-  ExpandMore,
 } from "@mui/icons-material";
 
 import { CippTimeAgo } from "./CippTimeAgo";
@@ -59,7 +53,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSettings } from "../../hooks/use-settings";
 import CippForefrontHeaderDialog from "./CippForefrontHeaderDialog";
-import { CippMessageDeliveryInfo } from "./CippMessageDeliveryInfo";
 
 export const CippMessageViewer = ({ emailSource }) => {
   const [emlContent, setEmlContent] = useState(null);
@@ -315,8 +308,6 @@ export const CippMessageViewer = ({ emailSource }) => {
 
   return (
     <>
-      <CippMessageDeliveryInfo emailSource={emailSource} />
-
       {emlError && (
         <Card className="mt-2 mb-4">
           <CardContent>
@@ -558,10 +549,6 @@ export const CippMessageViewer = ({ emailSource }) => {
 
 const CippMessageViewerPage = () => {
   const [emlFile, setEmlFile] = useState(null);
-  const [inputMode, setInputMode] = useState("upload");
-  const [pasteValue, setPasteValue] = useState("");
-  const [pasteCollapsed, setPasteCollapsed] = useState(false);
-
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader();
@@ -574,85 +561,14 @@ const CippMessageViewerPage = () => {
     });
   }, []);
 
-  const handleModeChange = (event, newMode) => {
-    if (newMode !== null) {
-      setInputMode(newMode);
-      setEmlFile(null);
-      setPasteCollapsed(false);
-    }
-  };
-
-  const handleAnalyze = () => {
-    setEmlFile(pasteValue);
-    setPasteCollapsed(true);
-  };
-
   return (
     <CippPageCard title="Message Viewer" hideBackButton={true}>
-      <Stack
-        direction="row"
-        spacing={2}
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
-        <ToggleButtonGroup
-          color="primary"
-          exclusive
-          size="small"
-          value={inputMode}
-          onChange={handleModeChange}
-        >
-          <ToggleButton value="upload">Upload EML</ToggleButton>
-          <ToggleButton value="paste">Paste headers / source</ToggleButton>
-        </ToggleButtonGroup>
-
-        {inputMode === "paste" && (
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button
-              variant="contained"
-              disabled={!pasteValue.trim()}
-              onClick={handleAnalyze}
-              startIcon={
-                <SvgIcon fontSize="small">
-                  <ReceiptLong />
-                </SvgIcon>
-              }
-            >
-              Analyze
-            </Button>
-            <Tooltip title={pasteCollapsed ? "Show input" : "Hide input"}>
-              <IconButton size="small" onClick={() => setPasteCollapsed((prev) => !prev)}>
-                <SvgIcon fontSize="small">
-                  {pasteCollapsed ? <ExpandMore /> : <ExpandLess />}
-                </SvgIcon>
-              </IconButton>
-            </Tooltip>
-          </Stack>
-        )}
-      </Stack>
-
-      {inputMode === "upload" ? (
-        <FileDropzone
-          onDrop={onDrop}
-          accept={{ "message/rfc822": [".eml"] }}
-          caption="Drag an EML file or click to add"
-          maxFiles={1}
-        />
-      ) : (
-        <Collapse in={!pasteCollapsed} unmountOnExit>
-          <TextField
-            multiline
-            minRows={8}
-            fullWidth
-            value={pasteValue}
-            onChange={(e) => setPasteValue(e.target.value)}
-            placeholder="Paste raw email headers or the full message source here"
-            slotProps={{ input: { sx: { fontFamily: "monospace", fontSize: "0.8rem" } } }}
-          />
-        </Collapse>
-      )}
-
+      <FileDropzone
+        onDrop={onDrop}
+        accept={{ "message/rfc822": [".eml"] }}
+        caption="Drag an EML file or click to add"
+        maxFiles={1}
+      />
       {emlFile && <CippMessageViewer emailSource={emlFile} />}
     </CippPageCard>
   );

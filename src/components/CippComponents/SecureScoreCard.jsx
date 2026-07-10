@@ -1,6 +1,5 @@
 import { Box, Card, CardHeader, CardContent, Typography, Divider, Skeleton } from '@mui/material'
 import { Security as SecurityIcon } from '@mui/icons-material'
-import { useRouter } from 'next/router'
 import {
   LineChart,
   Line,
@@ -13,22 +12,11 @@ import {
 } from 'recharts'
 
 export const SecureScoreCard = ({ data, isLoading }) => {
-  const router = useRouter()
   return (
     <Card sx={{ flex: 1, height: '100%' }}>
       <CardHeader
         title={
-          <Box
-            onClick={() => router.push('/tenant/administration/securescore')}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              cursor: 'pointer',
-              width: 'fit-content',
-              '&:hover': { textDecoration: 'underline' },
-            }}
-          >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <SecurityIcon sx={{ fontSize: 24 }} />
             <Typography variant="h6">Secure Score</Typography>
           </Box>

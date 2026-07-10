@@ -81,10 +81,6 @@ const compareNullable = (aVal, bVal) => {
 // These never change between renders, so extracting them avoids creating new
 // object references on every render cycle.
 
-// Stable ref so an undefined `data` prop doesn't create a fresh [] each render
-// and loop the static-data sync effect.
-const EMPTY_ARRAY = []
-
 const SORTING_FNS = {
   dateTimeNullsLast: (a, b, id) => {
     const aRaw = getRowValueByColumnId(a, id)
@@ -332,7 +328,7 @@ function renderColumnFilterModeMenuItemsFn({ internalFilterOptions, onSelectFilt
 export const CippDataTable = (props) => {
   const {
     queryKey,
-    data = EMPTY_ARRAY,
+    data = [],
     columns = [],
     api = {},
     isFetching = false,
@@ -734,16 +730,13 @@ export const CippDataTable = (props) => {
             sx={{ color: action.color }}
             key={`actions-list-row-${index}`}
             onClick={() => {
-              const scopeToRowTenant = () => {
-                if (settings.currentTenant === 'AllTenants' && row.original?.Tenant) {
-                  settings.handleUpdate({
-                    currentTenant: row.original.Tenant,
-                  })
-                }
+              if (settings.currentTenant === 'AllTenants' && row.original?.Tenant) {
+                settings.handleUpdate({
+                  currentTenant: row.original.Tenant,
+                })
               }
 
               if (action.noConfirm && action.customFunction) {
-                scopeToRowTenant()
                 action.customFunction(row.original, action, {})
                 closeMenu()
                 return
@@ -751,7 +744,6 @@ export const CippDataTable = (props) => {
 
               // Handle custom component differently
               if (typeof action.customComponent === 'function') {
-                scopeToRowTenant()
                 setCustomComponentData({ data: row.original, action: action })
                 setCustomComponentVisible(true)
                 closeMenu()

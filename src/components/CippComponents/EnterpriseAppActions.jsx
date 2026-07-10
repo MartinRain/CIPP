@@ -44,7 +44,7 @@ export const getEnterpriseAppPostActions = (canWriteApplication) => [
       },
     ],
     confirmText:
-      "'[displayName]' is a multi-tenant app, so a multi-tenant Enterprise App template will be created. This copies all permissions into a reusable template.",
+      "Create a deployment template from '[displayName]'? This will copy all permissions and create a reusable template.",
     condition: (row) => canWriteApplication && row?.signInAudience === 'AzureADMultipleOrgs',
   },
   {

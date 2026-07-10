@@ -30,13 +30,12 @@ export const CippFormUserAndGroupSelector = ({
         url: "/api/ListUsersAndGroups",
         dataKey: "Results",
         labelField: (option) => {
-          if (option.userPrincipalName) return `${option.displayName} (${option.userPrincipalName})`;
-          const groupType = option.mailEnabled && !option.securityEnabled
-            ? "Distribution Group"
-            : option.mailEnabled && option.securityEnabled
-            ? "Mail-Enabled Security Group"
-            : "Security Group";
-          return `${option.displayName} (${groupType})`;
+          // If it's a group (no userPrincipalName), just show displayName
+          if (!option.userPrincipalName) {
+            return `${option.displayName}`;
+          }
+          // If it's a user, show displayName and userPrincipalName
+          return `${option.displayName} (${option.userPrincipalName})`;
         },
         valueField: valueField ? valueField : "id",
         queryKey: `ListUsersAndGroups-${
@@ -52,6 +51,13 @@ export const CippFormUserAndGroupSelector = ({
           return options;
         },
         showRefresh: showRefresh,
+      }}
+      groupBy={(option) => {
+        // Group by type - Users or Groups
+        if (option["@odata.type"] === "#microsoft.graph.group") {
+          return "Groups";
+        }
+        return "Users";
       }}
       creatable={false}
       {...other}

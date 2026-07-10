@@ -25,7 +25,6 @@ import {
   IconButton,
   Stack,
   SvgIcon,
-  Tooltip,
   useMediaQuery,
   Popover,
   List,
@@ -301,15 +300,13 @@ export const TopNav = (props) => {
         </Stack>
         <Stack alignItems="center" direction="row" spacing={1.5}>
           {!mdDown && (
-            <Tooltip title="Search users & entities (Ctrl/Cmd+Shift+F)">
-              <IconButton
-                color="inherit"
-                onClick={() => openUniversalSearch('Users')}
-                aria-label="Open universal search (Ctrl/Cmd+Shift+F)"
-              >
-                <TravelExploreIcon color="action" fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              color="inherit"
+              onClick={() => openUniversalSearch('Users')}
+              title="Open Universal Search (Ctrl/Cmd+Shift+F)"
+            >
+              <TravelExploreIcon color="action" fontSize="small" />
+            </IconButton>
           )}
           {!mdDown && (
             <IconButton color="inherit" onClick={handleThemeSwitch}>
@@ -319,17 +316,15 @@ export const TopNav = (props) => {
             </IconButton>
           )}
           {!mdDown && (
-            <Tooltip title="Search pages (Ctrl/Cmd+K)">
-              <IconButton
-                color="inherit"
-                onClick={() => openUniversalSearch('Pages')}
-                aria-label="Open page search (Ctrl/Cmd+K)"
-              >
-                <SvgIcon color="action" fontSize="small">
-                  <MagnifyingGlassIcon />
-                </SvgIcon>
-              </IconButton>
-            </Tooltip>
+            <IconButton
+              color="inherit"
+              onClick={() => openUniversalSearch('Pages')}
+              title="Open Page Search (Ctrl/Cmd+K)"
+            >
+              <SvgIcon color="action" fontSize="small">
+                <MagnifyingGlassIcon />
+              </SvgIcon>
+            </IconButton>
           )}
           {showPopoverBookmarks && (
             <>
@@ -628,21 +623,7 @@ export const TopNav = (props) => {
               },
             }}
           >
-            <DialogTitle sx={{ px: 3, pt: 2, pb: 1 }}>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                flexWrap="wrap"
-                useFlexGap
-                spacing={1}
-              >
-                <span>Universal Search</span>
-                <Typography variant="caption" color="text.secondary">
-                  Pages: Ctrl/Cmd+K · Users: Ctrl/Cmd+Shift+F · Tenant: Ctrl/Cmd+Alt+K
-                </Typography>
-              </Stack>
-            </DialogTitle>
+            <DialogTitle sx={{ px: 3, pt: 2, pb: 1 }}>Universal Search</DialogTitle>
             <DialogContent sx={{ px: 3, pt: 1, pb: 3 }}>
               <Box>
                 <CippUniversalSearchV2
