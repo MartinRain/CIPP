@@ -20,9 +20,10 @@ function Get-Tenants {
     $TenantsTable = Get-CippTable -tablename 'Tenants'
     $ExcludedFilter = "PartitionKey eq 'Tenants' and Excluded eq true"
 
-    $SkipListCache = Get-CIPPAzDataTableEntity @TenantsTable -Filter $ExcludedFilter
+    # The excluded-tenant list is only needed when explicitly requested or while rebuilding
+    # the tenant cache. Avoid reading it on every normal Get-Tenants call.
     if ($SkipList) {
-        return $SkipListCache
+        return Get-CIPPAzDataTableEntity @TenantsTable -Filter $ExcludedFilter
     }
 
     if ($IncludeAll.IsPresent) {
@@ -86,10 +87,30 @@ function Get-Tenants {
             Remove-CIPPAzDataTableEntity -Force @TenantsTable -Entity $_
         }
     }
-    $PartnerModeTable = Get-CippTable -tablename 'tenantMode'
-    $PartnerTenantState = Get-CIPPAzDataTableEntity @PartnerModeTable
+    $RefreshRequired = $BuildRequired -or $TriggerRefresh.IsPresent
+    $PartnerTenantState = $null
 
-    if (($BuildRequired -or $TriggerRefresh.IsPresent) -and $PartnerTenantState.state -ne 'owntenant') {
+    # Partner mode only affects refreshes and the empty-cache own-tenant fallback below.
+    # Normal reads with cached tenants do not need to touch the tenantMode table.
+    $NeedPartnerMode = $RefreshRequired -or (($IncludedTenantsCache | Measure-Object).Count -eq 0)
+
+    if ($NeedPartnerMode) {
+        $PartnerModeTable = Get-CippTable -tablename 'tenantMode'
+        $PartnerTenantState = Get-CIPPAzDataTableEntity @PartnerModeTable `
+            -Filter "PartitionKey eq 'Setting' and RowKey eq 'PartnerModeSetting'" |
+            Select-Object -First 1
+
+        # Preserve compatibility with older/restored data if the well-known row is absent.
+        if (-not $PartnerTenantState) {
+            $PartnerTenantState = Get-CIPPAzDataTableEntity @PartnerModeTable |
+                Select-Object -First 1
+        }
+    }
+
+    if ($RefreshRequired -and $PartnerTenantState.state -ne 'owntenant') {
+        # The excluded-tenant list is only needed while rebuilding/refreshing the tenant cache.
+        $SkipListCache = Get-CIPPAzDataTableEntity @TenantsTable -Filter $ExcludedFilter
+
         # Get TenantProperties table
         $PropertiesTable = Get-CippTable -TableName 'TenantProperties'
         if (!$env:RefreshToken) {

@@ -90,7 +90,10 @@ Describe 'Get-Tenants refresh loop' {
             $null
         }
         Mock Get-CIPPAzDataTableEntity {
-            if ([string]::IsNullOrEmpty($Filter)) { return [PSCustomObject]@{ state = 'gdap' } }   # tenantMode
+            if ($Filter -eq "PartitionKey eq 'Setting' and RowKey eq 'PartnerModeSetting'") {
+                return [PSCustomObject]@{ state = 'gdap' }
+            }
+            if ([string]::IsNullOrEmpty($Filter)) { return [PSCustomObject]@{ state = 'gdap' } }       # legacy tenantMode fallback
             if ($Filter -like '*Excluded eq true*') { return $null }                                  # skip list
             if ($Filter -match "RowKey eq '([^']+)'") { return $script:RowsByKey[$Matches[1]] }       # one tenant
             return @($script:RowsByKey.Values)                                                         # cache read
@@ -103,6 +106,59 @@ Describe 'Get-Tenants refresh loop' {
             }
             if ($uri -like '*findTenantInformationByTenantId*') { return [PSCustomObject]@{ defaultDomainName = $script:FallbackDomain } }
             throw "unexpected Graph call: $uri"
+        }
+    }
+
+    Context 'table read optimization' {
+        It 'does not read excluded tenants or tenantMode during a normal cached tenant read' {
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Result = Get-Tenants -IncludeAll
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter { $Filter -like '*Excluded eq true*' } `
+                -Times 0 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter { $Filter -eq "PartitionKey eq 'Setting' and RowKey eq 'PartnerModeSetting'" } `
+                -Times 0 -Exactly
+
+            @($Result).Count | Should -Be 1
+            $Result.customerId | Should -Be $script:GuidA
+        }
+
+        It 'uses a point lookup for tenantMode and reads exclusions during a refresh' {
+            $script:Relationships = @(
+                New-Relationship -Guid $script:GuidA -DisplayName 'Contoso'
+            )
+
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Result = Get-Tenants -IncludeAll -TriggerRefresh
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter { $Filter -eq "PartitionKey eq 'Setting' and RowKey eq 'PartnerModeSetting'" } `
+                -Times 1 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter { [string]::IsNullOrEmpty($Filter) } `
+                -Times 0 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter { $Filter -like '*Excluded eq true*' } `
+                -Times 1 -Exactly
+
+            @($Result).Count | Should -Be 1
         }
     }
 
