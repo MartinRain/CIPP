@@ -39,9 +39,27 @@ function Get-Tenants {
         $SafeTenantFilter = ConvertTo-CIPPODataFilterValue -Value $TenantFilter -Type String
 
         if ($SafeTenantFilter -match '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$') {
-            $Filter = "{0} and customerId eq '{1}'" -f $Filter, $SafeTenantFilter
-            # create where-object scriptblock
-            $IncludedTenantFilter = [scriptblock]::Create("`$_.customerId -eq '$SafeTenantFilter'")
+            # customerId is also the RowKey of the Tenants cache. Use the indexed
+            # PartitionKey + RowKey pair instead of filtering on the customerId property.
+            $Filter = "PartitionKey eq 'Tenants' and RowKey eq '$SafeTenantFilter'"
+
+            # Preserve existing IncludeAll / IncludeErrors / healthy-tenant semantics
+            # locally after the point lookup. An explicit refresh must still be able
+            # to resolve the tenant regardless of its current health state.
+            if ($TriggerRefresh.IsPresent -or $IncludeAll.IsPresent) {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "`$_.customerId -eq '$SafeTenantFilter'"
+                )
+            } elseif ($IncludeErrors.IsPresent) {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "`$_.customerId -eq '$SafeTenantFilter' -and `$_.Excluded -eq `$false"
+                )
+            } else {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "`$_.customerId -eq '$SafeTenantFilter' -and `$_.Excluded -eq `$false -and `$_.GraphErrorCount -lt 50"
+                )
+            }
+
             $RelationshipFilter = " and customer/tenantId eq '$SafeTenantFilter'"
         } else {
             # parens: OData 'and' binds tighter than 'or', which would leave the initialDomainName clause unscoped

@@ -132,6 +132,50 @@ Describe 'Get-Tenants refresh loop' {
             $Result.customerId | Should -Be $script:GuidA
         }
 
+        It 'uses PartitionKey and RowKey for a tenant GUID lookup' {
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Result = Get-Tenants -TenantFilter $script:GuidA
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -eq "PartitionKey eq 'Tenants' and RowKey eq '$($script:GuidA)'"
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -like '*customerId eq*'
+                } `
+                -Times 0 -Exactly
+
+            @($Result).Count | Should -Be 1
+            $Result.customerId | Should -Be $script:GuidA
+        }
+
+        It 'preserves healthy-tenant filtering after a GUID point lookup' {
+            $Row = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Row.GraphErrorCount = 50
+            $script:RowsByKey[$script:GuidA] = $Row
+
+            $Result = Get-Tenants -TenantFilter $script:GuidA
+            @($Result).Count | Should -Be 0
+
+            $Result = Get-Tenants -TenantFilter $script:GuidA -IncludeErrors
+            @($Result).Count | Should -Be 1
+        }
+
         It 'uses a point lookup for tenantMode and reads exclusions during a refresh' {
             $script:Relationships = @(
                 New-Relationship -Guid $script:GuidA -DisplayName 'Contoso'
