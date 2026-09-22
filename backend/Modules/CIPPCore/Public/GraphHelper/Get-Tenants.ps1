@@ -19,6 +19,11 @@ function Get-Tenants {
 
     $TenantsTable = Get-CippTable -tablename 'Tenants'
     $ExcludedFilter = "PartitionKey eq 'Tenants' and Excluded eq true"
+    $TenantDomainIndexPartition = 'TenantDomainIndex'
+    $DomainLookupRequested = $false
+    $DomainIndexEntry = $null
+    $DomainFallbackFilter = $null
+    $RequestedDomain = $null
 
     # The excluded-tenant list is only needed when explicitly requested or while rebuilding
     # the tenant cache. Avoid reading it on every normal Get-Tenants call.
@@ -62,9 +67,44 @@ function Get-Tenants {
 
             $RelationshipFilter = " and customer/tenantId eq '$SafeTenantFilter'"
         } else {
-            # parens: OData 'and' binds tighter than 'or', which would leave the initialDomainName clause unscoped
-            $Filter = "{0} and (defaultDomainName eq '{1}' or initialDomainName eq '{1}')" -f $Filter, $SafeTenantFilter
-            $IncludedTenantFilter = [scriptblock]::Create("`$_.defaultDomainName -eq '$SafeTenantFilter' -or `$_.initialDomainName -eq '$SafeTenantFilter'")
+            $DomainLookupRequested = $true
+            $RequestedDomain = $SafeTenantFilter.ToLowerInvariant()
+            $SafeDomainIndexKey = ConvertTo-CIPPODataFilterValue -Value $RequestedDomain -Type String
+
+            # Keep the historical property-filter query available as a fallback for
+            # missing or stale index entries.
+            $DomainFallbackFilter = "{0} and (defaultDomainName eq '{1}' or initialDomainName eq '{1}')" -f $Filter, $SafeTenantFilter
+
+            # Domain names are case-insensitive and valid Azure Table RowKeys, so keep
+            # a compact domain -> customerId index in a separate partition of Tenants.
+            $DomainIndexFilter = "PartitionKey eq '$TenantDomainIndexPartition' and RowKey eq '$SafeDomainIndexKey'"
+            $DomainIndexEntry = Get-CIPPAzDataTableEntity @TenantsTable -Filter $DomainIndexFilter |
+                Select-Object -First 1
+
+            if ($DomainIndexEntry.customerId) {
+                $SafeIndexedCustomerId = ConvertTo-CIPPODataFilterValue -Value $DomainIndexEntry.customerId -Type String
+                $Filter = "PartitionKey eq 'Tenants' and RowKey eq '$SafeIndexedCustomerId'"
+            } else {
+                $Filter = $DomainFallbackFilter
+            }
+
+            # A point lookup no longer contains Excluded/GraphErrorCount in its server-side
+            # filter, so preserve the historical semantics locally. Explicit refreshes must
+            # still be able to resolve an unhealthy tenant so they can repair it.
+            if ($TriggerRefresh.IsPresent -or $IncludeAll.IsPresent) {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "(`$_.defaultDomainName -ieq '$SafeTenantFilter' -or `$_.initialDomainName -ieq '$SafeTenantFilter')"
+                )
+            } elseif ($IncludeErrors.IsPresent) {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "(`$_.defaultDomainName -ieq '$SafeTenantFilter' -or `$_.initialDomainName -ieq '$SafeTenantFilter') -and `$_.Excluded -eq `$false"
+                )
+            } else {
+                $IncludedTenantFilter = [scriptblock]::Create(
+                    "(`$_.defaultDomainName -ieq '$SafeTenantFilter' -or `$_.initialDomainName -ieq '$SafeTenantFilter') -and `$_.Excluded -eq `$false -and `$_.GraphErrorCount -lt 50"
+                )
+            }
+
             $RelationshipFilter = ''
         }
     } else {
@@ -73,6 +113,42 @@ function Get-Tenants {
     }
 
     $IncludedTenantsCache = Get-CIPPAzDataTableEntity @TenantsTable -Filter $Filter
+
+    if ($DomainLookupRequested) {
+        $ResolvedIndexedTenant = $IncludedTenantsCache | Select-Object -First 1
+        $IndexIsValid = $DomainIndexEntry.customerId -and $ResolvedIndexedTenant -and (
+            $ResolvedIndexedTenant.defaultDomainName -ieq $RequestedDomain -or
+            $ResolvedIndexedTenant.initialDomainName -ieq $RequestedDomain
+        )
+
+        if ($DomainIndexEntry.customerId -and -not $IndexIsValid) {
+            # The tenant's domains changed since this index row was written.
+            # Remove the stale mapping and fall back to the canonical property lookup.
+            Remove-CIPPAzDataTableEntity @TenantsTable -Entity $DomainIndexEntry -Force
+            $DomainIndexEntry = $null
+            $IncludedTenantsCache = Get-CIPPAzDataTableEntity @TenantsTable -Filter $DomainFallbackFilter
+        }
+
+        if (-not $DomainIndexEntry.customerId) {
+            $ResolvedDomainTenant = $IncludedTenantsCache |
+                Where-Object {
+                    $_.defaultDomainName -ieq $RequestedDomain -or
+                    $_.initialDomainName -ieq $RequestedDomain
+                } |
+                Select-Object -First 1
+
+            if ($ResolvedDomainTenant.customerId) {
+                $DomainIndexEntity = [PSCustomObject]@{
+                    PartitionKey = $TenantDomainIndexPartition
+                    RowKey       = $RequestedDomain
+                    customerId   = $ResolvedDomainTenant.customerId
+                }
+
+                Add-CIPPAzDataTableEntity @TenantsTable -Entity $DomainIndexEntity -Force |
+                    Out-Null
+            }
+        }
+    }
 
     if (($IncludedTenantsCache | Measure-Object).Count -eq 0 -and $TenantFilter -ne $env:TenantID) {
         $BuildRequired = $true

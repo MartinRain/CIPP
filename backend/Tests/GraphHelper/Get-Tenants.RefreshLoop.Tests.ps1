@@ -72,6 +72,7 @@ AfterAll {
 Describe 'Get-Tenants refresh loop' {
     BeforeEach {
         $script:RowsByKey = @{}
+        $script:DomainIndexByKey = @{}
         $script:Relationships = @()
         $script:Aliases = @{}
         $script:DomainsByTenant = @{}
@@ -83,6 +84,7 @@ Describe 'Get-Tenants refresh loop' {
         Mock Write-LogMessage {}
         Mock Get-CippException { @{} }
         Mock Add-CIPPAzDataTableEntity {}
+        Mock Remove-CIPPAzDataTableEntity {}
         Mock Get-AzDataTableEntity {
             if ($Filter -match "PartitionKey eq '([^']+)'" -and $script:Aliases.ContainsKey($Matches[1])) {
                 return [PSCustomObject]@{ Value = $script:Aliases[$Matches[1]] }
@@ -95,7 +97,27 @@ Describe 'Get-Tenants refresh loop' {
             }
             if ([string]::IsNullOrEmpty($Filter)) { return [PSCustomObject]@{ state = 'gdap' } }       # legacy tenantMode fallback
             if ($Filter -like '*Excluded eq true*') { return $null }                                  # skip list
-            if ($Filter -match "RowKey eq '([^']+)'") { return $script:RowsByKey[$Matches[1]] }       # one tenant
+
+            if ($Filter -match "PartitionKey eq 'TenantDomainIndex' and RowKey eq '([^']+)'") {
+                return $script:DomainIndexByKey[$Matches[1]]
+            }
+
+            if ($Filter -match "PartitionKey eq 'Tenants' and RowKey eq '([^']+)'") {
+                return $script:RowsByKey[$Matches[1]]
+            }
+
+            # Simulate the historical by-domain property lookup.
+            if ($Filter -match "defaultDomainName eq '([^']+)'") {
+                $Requested = $Matches[1]
+                return @(
+                    $script:RowsByKey.Values |
+                        Where-Object {
+                            $_.defaultDomainName -ieq $Requested -or
+                            $_.initialDomainName -ieq $Requested
+                        }
+                )
+            }
+
             return @($script:RowsByKey.Values)                                                         # cache read
         }
         Mock New-GraphGetRequest {
@@ -174,6 +196,172 @@ Describe 'Get-Tenants refresh loop' {
 
             $Result = Get-Tenants -TenantFilter $script:GuidA -IncludeErrors
             @($Result).Count | Should -Be 1
+        }
+
+        It 'uses the domain index and tenant RowKey when the mapping exists' {
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $script:DomainIndexByKey['contoso.com'] = [PSCustomObject]@{
+                PartitionKey = 'TenantDomainIndex'
+                RowKey       = 'contoso.com'
+                customerId   = $script:GuidA
+            }
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com'
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -eq "PartitionKey eq 'TenantDomainIndex' and RowKey eq 'contoso.com'"
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -eq "PartitionKey eq 'Tenants' and RowKey eq '$($script:GuidA)'"
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -like '*defaultDomainName eq*'
+                } `
+                -Times 0 -Exactly
+
+            @($Result).Count | Should -Be 1
+            $Result.customerId | Should -Be $script:GuidA
+        }
+
+        It 'preserves healthy-tenant filtering on a domain index hit' {
+            $Row = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Row.GraphErrorCount = 50
+            $script:RowsByKey[$script:GuidA] = $Row
+
+            $script:DomainIndexByKey['contoso.com'] = [PSCustomObject]@{
+                PartitionKey = 'TenantDomainIndex'
+                RowKey       = 'contoso.com'
+                customerId   = $script:GuidA
+            }
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com'
+            @($Result).Count | Should -Be 0
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com' -IncludeErrors
+            @($Result).Count | Should -Be 1
+        }
+
+        It 'preserves excluded-tenant filtering on a domain index hit' {
+            $Row = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Row.Excluded = $true
+            $script:RowsByKey[$script:GuidA] = $Row
+
+            $script:DomainIndexByKey['contoso.com'] = [PSCustomObject]@{
+                PartitionKey = 'TenantDomainIndex'
+                RowKey       = 'contoso.com'
+                customerId   = $script:GuidA
+            }
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com'
+            @($Result).Count | Should -Be 0
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com' -IncludeErrors
+            @($Result).Count | Should -Be 0
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com' -IncludeAll
+            @($Result).Count | Should -Be 1
+        }
+
+        It 'falls back to the legacy domain lookup and self-populates the index on a miss' {
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Contoso' `
+                -Default 'contoso.com' `
+                -Initial 'contoso.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com'
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -like "*defaultDomainName eq 'contoso.com'*"
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Add-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Entity.PartitionKey -eq 'TenantDomainIndex' -and
+                    $Entity.RowKey -eq 'contoso.com' -and
+                    $Entity.customerId -eq $script:GuidA
+                } `
+                -Times 1 -Exactly
+
+            @($Result).Count | Should -Be 1
+        }
+
+        It 'removes a stale domain index entry and falls back to the canonical lookup' {
+            $script:GuidB = '22222222-2222-2222-2222-222222222222'
+
+            $script:RowsByKey[$script:GuidA] = New-CachedRow `
+                -Guid $script:GuidA `
+                -DisplayName 'Old tenant' `
+                -Default 'old.contoso.com' `
+                -Initial 'oldtenant.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $script:RowsByKey[$script:GuidB] = New-CachedRow `
+                -Guid $script:GuidB `
+                -DisplayName 'Current tenant' `
+                -Default 'contoso.com' `
+                -Initial 'currenttenant.onmicrosoft.com' `
+                -LastRefresh ([DateTimeOffset]::UtcNow.AddDays(-2))
+
+            $script:DomainIndexByKey['contoso.com'] = [PSCustomObject]@{
+                PartitionKey = 'TenantDomainIndex'
+                RowKey       = 'contoso.com'
+                customerId   = $script:GuidA
+            }
+
+            $Result = Get-Tenants -TenantFilter 'contoso.com'
+
+            Should -Invoke Remove-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Entity.PartitionKey -eq 'TenantDomainIndex' -and
+                    $Entity.RowKey -eq 'contoso.com'
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Get-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Filter -like "*defaultDomainName eq 'contoso.com'*"
+                } `
+                -Times 1 -Exactly
+
+            Should -Invoke Add-CIPPAzDataTableEntity `
+                -ParameterFilter {
+                    $Entity.PartitionKey -eq 'TenantDomainIndex' -and
+                    $Entity.RowKey -eq 'contoso.com' -and
+                    $Entity.customerId -eq $script:GuidB
+                } `
+                -Times 1 -Exactly
+
+            @($Result).Count | Should -Be 1
+            $Result.customerId | Should -Be $script:GuidB
         }
 
         It 'uses a point lookup for tenantMode and reads exclusions during a refresh' {
