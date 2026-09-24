@@ -54,6 +54,19 @@ Use **Add a condition** to build the rule. Each condition is a property, an oper
 | is              | The comparison to apply: `Equals to`, `Not Equals to`, `Like`, `Not like`, `Does not match`, `Greater than`, `Less than`, `In`, or `Not In`.                                                 |
 | Input           | The value to compare against. This is a free-text box for most properties, a picker when the property has a known set of values, and a multi-value picker when the operator is In or Not In. |
 
+#### Alerting on failed sign-ins
+
+With the Azure AD log source, a failed sign-in (operation `UserLoginFailed`) carries two properties that say why it failed:
+
+| Property      | Contains                                                                                                                  | Example                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `ErrorNumber` | The AADSTS error code as a number, without the `AADSTS` prefix.                                                           | `53003`                      |
+| `LogonError`  | The name of the same error.                                                                                               | `BlockedByConditionalAccess` |
+
+Both properties offer a picker of the error codes and names Microsoft publishes, so you can search for the error you want rather than typing it. For example, to alert when Conditional Access blocks a sign-in, use either `ErrorNumber` `Equals to` `53003` or `LogonError` `Equals to` `BlockedByConditionalAccess`.
+
+For what each code means, see Microsoft's [AADSTS error code reference](https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes). The full list of sign-in record properties is in Microsoft's [Azure Active Directory STS logon schema](https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema#azure-active-directory-secure-token-service-sts-logon-schema).
+
 ### Scripted CIPP Alert
 
 | Field                            | Description                                                                                                            |
