@@ -348,6 +348,7 @@ const Page = () => {
                         multiple={false}
                         creatable={false}
                         options={INACTIVE_OPTIONS}
+                        helperText="Usage evidence comes from Microsoft's last 180 days of reports. This value is the inactivity and unused threshold within that window."
                       />
                       <CippFormComponent
                         type="autoComplete"
