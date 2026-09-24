@@ -153,23 +153,30 @@ With **Enable Automated CVE Sync** on, each tenant synchronisation uploads that 
 
 {% stepper %}
 {% step %}
-### Schedule vulnerability collection in CIPP
+### Check CIPP holds vulnerability data
 
-On the CVE Management page, select **Schedule CVE Sync**, choose a tenant or all tenants, set a frequency, and create the schedule. This is what populates the vulnerability data CIPP later uploads.
+There is nothing to schedule. CIPP collects Defender vulnerability data as part of its nightly data cache for every tenant licensed for Microsoft Defender for Endpoint, and that cached data is what gets uploaded. To confirm a tenant has data, or to refresh it straight away, open **Security** > **Defender** > **CVE Management** with the tenant selected and the page set to **Cached**, then select **Sync**.
 {% endstep %}
 
 {% step %}
 ### Configure the prefix
 
-Turn on **Enable Automated CVE Sync**, set the **CVE Sync Scan Group Prefix**, and select **Submit**. CIPP looks for a scan group named with this prefix followed by the tenant's default domain name.
+On the NinjaOne integration page in CIPP, the same page used to enter the connection details, turn on **Enable Automated CVE Sync**, set the **CVE Sync Scan Group Prefix**, and select **Submit**. CIPP looks for a scan group named with this prefix followed by the tenant's default domain name.
 {% endstep %}
 
 {% step %}
 ### Create the scan groups in NinjaOne
 
-On the Vulnerabilities page, select the tenant, then export the list to CSV.
+NinjaOne needs a sample CSV to create a scan group, and it takes its column names from that file. Create a CSV with two columns, one for the device name and one for the CVE ID, and one example row, for example:
 
-In NinjaOne go to **Administration** > **Apps** > **Microsoft Defender**, open the **Scan Groups** tab and select **+ Create scan group**. Name it exactly as CIPP expects: the prefix followed by the tenant's default domain name, then upload the CSV and confirm the column mappings.
+```
+deviceName,cveId
+DESKTOP-01,CVE-2024-12345
+```
+
+Do not use the export from the **Vulnerabilities** page. It lists each CVE once with all of its affected devices in a single column, so there is no per-device column to map.
+
+In NinjaOne go to **Administration** > **Apps** > **Microsoft Defender**, open the **Scan Groups** tab and select **+ Create scan group**. Name it exactly as CIPP expects: the prefix followed by the tenant's default domain name. Upload the CSV and map the device name column as the device identifier and the CVE ID column as the CVE. On each sync CIPP reads those column names back from the scan group and uploads one row per affected device and CVE, so the column names can be anything you like.
 {% endstep %}
 {% endstepper %}
 
