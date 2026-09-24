@@ -1,16 +1,14 @@
 ---
 description: See how real attacks would play out in a tenant today, and which controls close each gap.
-hidden: true
-noIndex: true
 ---
 
 # Security Simulations
 
-Security Simulations shows you what an attacker would experience in a tenant right now. Instead of listing settings, it walks through the events that lead to a breach, checks each step against the tenant's real configuration, and tells you which control stops the attack or which one is missing. Nothing on the page signs in as a user or changes the tenant by itself. The only changes happen when you pick a fix and confirm it.
-
-{% hint style="info" %}
-Security Simulations is in public beta and is off by default. Turn it on from [features.md](../../cipp/settings/features.md "mention").
+{% hint style="warning" %}
+Security Simulations is a beta feature and is off by default. Turn it on with the **Security Simulations** flag on the [features.md](../../cipp/settings/features.md "mention") tab of CIPP settings. Behaviour and screens are still changing between releases.
 {% endhint %}
+
+Security Simulations shows you what an attacker would experience in a tenant right now. Instead of listing settings, it walks through the events that lead to a breach, checks each step against the tenant's real configuration, and tells you which control stops the attack or which one is missing. Nothing on the page signs in as a user or changes the tenant by itself. The only changes happen when you pick a fix and confirm it.
 
 The page has three tabs, and each needs a single tenant selected:
 

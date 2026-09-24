@@ -2,6 +2,8 @@
 
 This report lists every licence SKU present in the selected tenant, showing how many of each are owned, how many are in use, and who holds them. It is the quickest way to spot over-provisioning across a client base, or to find which users and groups are consuming a particular SKU.
 
+This page covers the **Licences** tab. The report also has an [optimization.md](optimization.md "mention") tab, which suggests licence removals, plan changes and term changes with their estimated savings and can produce a client-ready PDF, and a [pricing.md](pricing.md "mention") tab, which holds the monthly per-seat prices those figures are calculated from.
+
 The report supports the All Tenants view. Because gathering licence data from every tenant takes time, the first request queues a background job and shows a message asking you to check back once it completes. Results are cached for an hour, so subsequent loads return immediately.
 
 ## Table Details
@@ -49,4 +51,4 @@ This report tries to make an estimate of the NCE term by calculating the dates. 
 This page accepts filters passed in the URL, so links from dashboards and other reports can open it pre-filtered to a particular SKU or tenant.
 {% endhint %}
 
-{% include "../../../../.gitbook/includes/feature-request.md" %}
+{% include "../../../../../.gitbook/includes/feature-request.md" %}

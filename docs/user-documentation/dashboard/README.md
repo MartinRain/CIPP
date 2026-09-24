@@ -10,7 +10,7 @@ Welcome to the CIPP Dashboard. This page gives you both an overview of your clie
 What the dashboard shows depends on the tenant selector. Choose a single tenant and you get that tenant's detail. Choose **All Tenants**, which is also where you land before picking a tenant, and the page swaps to an estate-wide view.
 
 {% hint style="warning" %}
-Much of the dashboard is built from data cached in CIPP's reporting database, refreshed by a scheduled job. The first time you load the dashboard for a tenant you may see little or nothing until that job has run. Use **Refresh** to collect the data immediately rather than waiting.
+Much of the dashboard is built from data CIPP collects on a schedule. The first time you load the dashboard for a tenant you may see little or nothing until that collection has run. Use **Refresh** to collect the data immediately rather than waiting.
 {% endhint %}
 
 ## Walkthrough
@@ -19,7 +19,7 @@ Much of the dashboard is built from data cached in CIPP's reporting database, re
 
 ## All Tenants View
 
-Under All Tenants the dashboard is built entirely from cached data, with no live Graph calls, and is organised into three bands. Almost every figure links through to the page where you can investigate it.
+Under All Tenants the dashboard is built entirely from data CIPP has already collected, and is organised into three bands. Almost every figure links through to the page where you can investigate it.
 
 ### Portfolio
 
@@ -210,7 +210,7 @@ Deletes the selected custom test suite. Built-in suites cannot be deleted, and t
 
 <summary>Tenant</summary>
 
-The tenant's name, tenant ID, and primary domain. The tenant ID can be copied to the clipboard.
+The tenant's name, tenant ID, and primary domain. The tenant ID can be copied to the clipboard. The card's **Tenant** heading opens the [edit.md](../tenant/manage/edit.md "mention") page for the tenant.
 
 </details>
 
@@ -247,7 +247,7 @@ Every item the tenant's scripted alerts are currently reporting, with counts for
 * The clock icon snoozes an item so it stops notifying, for 7 to 90 days or until it resolves. Tick "keep it visible" to leave it in the open list marked as snoozed, so it is not forgotten; otherwise it moves to the snoozed section. Either way the bin icon lifts the snooze early.
 * Recently resolved items appear in a muted section for two days, so you can confirm a fix landed.
 
-**History** opens the [alert-history](../tenant/administration/alert-configuration/alert-history.md "mention") page for every tenant; **Manage** opens the [alert-configuration](../tenant/administration/alert-configuration/ "mention") page.
+**History** opens the [alert-history](../tenant/administration/alert-configuration/alert-history.md "mention") page for every tenant; **Manage** opens the [alert-configuration](../tenant/administration/alert-configuration/ "mention") page, as does the card's **Alerts** heading.
 
 </details>
 

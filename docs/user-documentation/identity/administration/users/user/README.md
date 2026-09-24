@@ -64,7 +64,7 @@ The Conditional Access policies that applied successfully during the sign-in sho
 The card reports separately when the sign-in applied no policies at all and when no policy data is available.
 
 {% hint style="info" %}
-To see how a policy would behave for this user rather than how one behaved on a single sign-in, use the conditional-access.md tab.
+To see how a policy would behave for this user rather than how one behaved on a single sign-in, use the [conditional-access.md](conditional-access.md "mention") tab.
 {% endhint %}
 
 ## Multi-Factor Authentication Devices
@@ -121,6 +121,6 @@ Two cards list what the account belongs to, each showing a count in its header.
 
 ## Managed Devices
 
-The Intune managed devices registered to this user, matched on their user principal name. Each row shows the device name, operating system, OS version and management type, and the row action opens the device.md page. The card reports separately when the user has no managed devices and when the device lookup failed.
+The Intune managed devices registered to this user, matched on their user principal name. Each row shows the device name, operating system, OS version and management type, and the row action opens the [device.md](../../../../endpoint/MEM/devices/device.md "mention") page. The card reports separately when the user has no managed devices and when the device lookup failed.
 
 {% include "../../../../../../.gitbook/includes/feature-request.md" %}

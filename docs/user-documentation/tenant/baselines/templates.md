@@ -1,7 +1,5 @@
 ---
 description: Create, import, run and manage the baselines applied to your tenants
-hidden: true
-noIndex: true
 ---
 
 # Manage Baselines
@@ -38,37 +36,46 @@ Converts your classic Standards templates, drift templates included, into baseli
 
 The flyout previews every template it found and pre-selects the ones it can convert. Clear the tick against any you would rather leave behind, then use the **Migrate** button at the bottom.
 
-| Field                                                                                                    | Description                                                                                                                            |
-| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Import everything as report-only (recommended)                                                           | Brings every standard across with automatic fixing switched off, so you can review the results before letting CIPP change anything. Re-enable it per standard afterwards. |
-| Migrated drift templates should also alert on Intune and Conditional Access policies that were not created from a template | Adds detection of policies that exist in the tenant but were never deployed from a template, so they surface as deviations.            |
+| Field                                                                                                                      | Description                                                                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Import everything as report-only (recommended)                                                                             | Brings every standard across with automatic fixing switched off, so you can review the results before letting CIPP change anything. Re-enable it per standard afterwards. |
+| Migrated drift templates should also alert on Intune and Conditional Access policies that were not created from a template | Adds detection of policies that exist in the tenant but were never deployed from a template, so they surface as deviations.                                               |
 
 Each template in the list carries a status.
 
-| Status      | Meaning                                                                       |
-| ----------- | ------------------------------------------------------------------------------ |
-| Ready       | The template has not been migrated before and will be created as a baseline.  |
-| Will update | A baseline already exists for this template and will be brought up to date.   |
-| Up to date  | An existing baseline already matches the template, so nothing is done.        |
-| Skipped     | The template was not converted. The row explains why.                          |
-| Migrated    | The template was created as a new baseline during this run.                   |
-| Updated     | An existing baseline was brought up to date during this run.                  |
-| Failed      | The conversion did not complete. The row explains why.                         |
+| Status      | Meaning                                                                      |
+| ----------- | ---------------------------------------------------------------------------- |
+| Ready       | The template has not been migrated before and will be created as a baseline. |
+| Will update | A baseline already exists for this template and will be brought up to date.  |
+| Up to date  | An existing baseline already matches the template, so nothing is done.       |
+| Skipped     | The template was not converted. The row explains why.                        |
+| Migrated    | The template was created as a new baseline during this run.                  |
+| Updated     | An existing baseline was brought up to date during this run.                 |
+| Failed      | The conversion did not complete. The row explains why.                       |
 
 </details>
 
+## Filters
+
+| Filter                   | Shows                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| Synced from repository   | Baselines kept in step with a GitHub repository.                                           |
+| Local changes not pushed | Synced baselines holding changes made in CIPP that have not been pushed to the repository. |
+| Not synced               | Baselines that are not linked to a GitHub repository.                                      |
+
 ## Table Details
 
-| Column           | Description                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| Baseline         | The name given to the baseline.                                                                      |
-| Description      | The free-text description recorded against it.                                                       |
-| Standards        | How many standards it carries across all of its stages.                                              |
-| Stages           | The names of its stages, in the order tenants pass through them.                                     |
-| Assigned Tenants | The tenants and tenant groups the baseline applies to.                                               |
-| Remediation      | Whether the baseline reports on deviations only, or corrects them automatically.                     |
-| Updated At       | When the baseline was last saved.                                                                    |
-| Updated By       | The operator who last saved it.                                                                      |
+| Column           | Description                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Baseline         | The name given to the baseline.                                                    |
+| Synced From      | The GitHub repository the baseline was imported from or saved to, when it has one. |
+| Description      | The free-text description recorded against it.                                     |
+| Standards        | How many standards it carries across all of its stages.                            |
+| Stages           | The names of its stages, in the order tenants pass through them.                   |
+| Assigned Tenants | The tenants and tenant groups the baseline applies to.                             |
+| Remediation      | Whether the baseline reports on deviations only, or corrects them automatically.   |
+| Updated At       | When the baseline was last saved.                                                  |
+| Updated By       | The operator who last saved it.                                                    |
 
 Selecting a row opens the **Baseline Details** flyout. Alongside those values it shows the progress of each stage: how many tenants sit in it, how many standards it applies, the date of the next time-based advance, and the conditions a tenant must meet before it moves into the following stage.
 

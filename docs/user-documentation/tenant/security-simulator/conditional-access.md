@@ -1,7 +1,5 @@
 ---
 description: Review a tenant's Conditional Access policies as a set, score them, and find the gaps between them.
-hidden: true
-noIndex: true
 ---
 
 # CA Gap Analysis

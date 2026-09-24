@@ -1,6 +1,6 @@
 # Add JIT Admin
 
-This page grants time-limited administrative access. You choose who gets it, what they get, and when it ends, and CIPP acts on the account automatically at expiry. The result appears on the [.](./ "mention")README.md page for as long as CIPP is tracking it.
+This page grants time-limited administrative access. You choose who gets it, what they get, and when it ends, and CIPP acts on the account automatically at expiry. The result appears on the [README.md](README.md "mention") page for as long as CIPP is tracking it.
 
 ## Tenant and template
 
@@ -58,7 +58,7 @@ If your CIPP role has a [JIT Role Template](../jit-role-templates/README.md "men
 The pass lifetime is worked out from the access window rather than entered, then clamped to what the tenant's policy allows. The form states how long the pass will be valid once both dates are set, and warns before you submit if Temporary Access Pass is not enabled in the tenant, in which case generation fails.
 
 {% hint style="info" %}
-Temporary Access Pass has to be enabled in the tenant's authentication methods policy first. The templates include an "Enable Temporary Access Passwords" standard that turns it on.
+Temporary Access Pass has to be enabled in the tenant's authentication methods policy first. The **Enable Temporary Access Passes (TAP)** standard turns it on.
 {% endhint %}
 
 ## Expiry and notification
@@ -72,6 +72,21 @@ The expiration action offers **Delete User** and **Disable User** for any grant.
 
 {% hint style="info" %}
 Notification channels only deliver if they are configured in CIPP's [notifications.md](../../../cipp/settings/notifications.md "mention") settings first. Selecting one that is not set up produces no notification rather than an error.
+{% endhint %}
+
+## Vacation Mode
+
+**Enable Vacation Mode** is offered when the access is assigned to an existing user. It stops the account's elevated sign-ins being blocked or flagged for being somewhere unusual, for example when someone needs admin access while travelling. The exclusions cover the same window as the JIT access, plus a one-hour buffer after the end date.
+
+| Field                                         | Description                                                                                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Conditional Access Policies in _tenant_       | The Conditional Access policies to exclude the user from. Several can be selected. The list is read from the selected tenant.                  |
+| Exclude from location-based audit log alerts  | Keeps the user off location-based audit log alerts for the window, so sign-ins from an unusual location do not raise alerts.                    |
+
+Once Vacation Mode is on, the form warns until at least one policy is selected or the audit alert switch is turned on. The exclusions are only scheduled after the JIT admin itself is created successfully, and they appear on the [Vacation Mode](../vacation-mode/README.md "mention") page with the reason as their reference, where they can be reviewed or removed like any other vacation. A template can turn Vacation Mode on by default and pre-select the policies.
+
+{% hint style="warning" %}
+Excluding an account from a Conditional Access policy lifts that policy's protection for the whole window, on an account that holds elevated roles. Choose only the policies that would actually get in the way.
 {% endhint %}
 
 {% include "../../../../../.gitbook/includes/feature-request.md" %}
