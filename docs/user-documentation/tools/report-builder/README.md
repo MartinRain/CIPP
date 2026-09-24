@@ -1,6 +1,6 @@
 # Report Builder
 
-This is CIPP's custom report builder introduced with the deprecation of the Best Practice Analyser. This page contains two tabs:
+This is CIPP's custom report builder. This page contains two tabs:
 
 The Report Builder needs the `CIPP.ReportBuilder` permission. Read lets a role open generated reports and templates, and Read/Write lets it build templates and generate reports.
 

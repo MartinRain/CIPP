@@ -8,7 +8,6 @@ To change a flag, open the actions menu on its row and choose **Enable Feature**
 
 | Feature                | Status      | Description                                                                                                                                                      |
 | ---------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Best Practice Analyser | Deprecation | This feature is being deprecated in favour of the new reporting database cache being used by Dashboard v2 and will be removed in a future release.               |
 | MCP Server             | Beta        | Model Context Protocol (MCP) server endpoint that exposes CIPP's read-only API surface as tools for AI clients. Disabled by default; enable to allow MCP access. |
 
 {% hint style="info" %}

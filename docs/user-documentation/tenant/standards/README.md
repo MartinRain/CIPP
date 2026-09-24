@@ -45,7 +45,7 @@ Each standard in a template is set to one or more of the following.
 
 | Action    | Description                                                                                                                                                                   |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Report    | Logs the current configuration and stores it in the CIPP database for your standards reports or BPA reports.                                                                  |
+| Report    | Logs the current configuration and stores it in the CIPP database for your standards reports.                                                                  |
 | Alert     | Sends a notification via the method configured under CIPP, Application Settings, Notifications.                                                                               |
 | Remediate | Changes the tenant's configuration, and reports in the backend. All Remediate standards also Report, so enabling Report alongside it is optional and only for visual clarity. |
 
