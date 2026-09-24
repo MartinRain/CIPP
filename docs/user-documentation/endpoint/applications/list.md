@@ -43,6 +43,10 @@ Site-level fields repeat once for every tenant you selected, labelled with that 
 
 Huntress guidance on choosing organisation keys is in their article on [account keys, organization keys and agent tags](https://support.huntress.io/hc/en-us/articles/4404012734227-Using-Account-Keys-Organization-Keys-and-Agent-Tags).
 
+{% hint style="warning" %}
+As of version 11.0.0, CIPP deploys Huntress with Huntress's current install script. Earlier deployments can fail on newer Huntress agents, which Autopilot's Enrollment Status Page reports as `Apps (0x80070001)`. A tenant that already has the Huntress app keeps the install it was deployed with, so remove that app from the tenant and deploy Huntress again from CIPP to pick up the fix.
+{% endhint %}
+
 **CW Automate**
 
 | Field                             | Description                                                          |
@@ -179,7 +183,7 @@ Triggers a sync of all Apple Volume Purchase Program (VPP) tokens for the select
 
 ## Table Details
 
-The properties returned are for the Graph resource type `mobileApp`. For more information on the properties please see the [Graph documentation](https://learn.microsoft.com/en-us/graph/api/resources/intune-apps-mobileapp?view=graph-rest-1.0#properties).
+The properties returned are for the Graph resource type `mobileApp`. For more information on the properties please see the [Graph documentation](https://learn.microsoft.com/en-us/graph/api/resources/intune-apps-mobileapp?view=graph-rest-beta#properties).
 
 CIPP adds the following columns by resolving each application's assignments against the groups in the tenant:
 

@@ -10,6 +10,10 @@ description: Standards ensure consistent configuration across your Microsoft 365
 This page serves as an overview of CIPP Standards. For the technical components of each page and details on the actions you can take, please see the respective docs page under this menu item to the left.
 {% endhint %}
 
+{% hint style="info" %}
+Turning on the **Baselines** feature flag on the [features.md](../../cipp/settings/features.md "mention") tab of CIPP settings replaces Standards and Drift with [README.md](../baselines/README.md "mention"). While it is on, the Standards & Drift Alignment, Manage Drift, Applied Standards Report and Policies and Settings Deployed pages are hidden, and the scheduled Standards and Drift runs stop.
+{% endhint %}
+
 ## Standards Overview
 
 Standards keep your Microsoft 365 tenants configured the way you intend, by checking their settings on a schedule and acting when they do not match. This catches configuration that has been changed by hand, inherited from a tenant you took over, or never set correctly in the first place.

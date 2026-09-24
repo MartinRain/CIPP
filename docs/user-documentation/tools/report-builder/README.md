@@ -2,8 +2,6 @@
 
 This is CIPP's custom report builder. This page contains two tabs:
 
-The Report Builder needs the `CIPP.ReportBuilder` permission. Read lets a role open generated reports and templates, and Read/Write lets it build templates and generate reports.
-
 {% content-ref url="generated.md" %}
 [generated.md](generated.md)
 {% endcontent-ref %}
@@ -11,6 +9,8 @@ The Report Builder needs the `CIPP.ReportBuilder` permission. Read lets a role o
 {% content-ref url="templates.md" %}
 [templates.md](templates.md)
 {% endcontent-ref %}
+
+The Report Builder needs the `CIPP.ReportBuilder` permission. Read lets a role open generated reports and templates, and Read/Write lets it build templates and generate reports.
 
 ## Feature Walkthrough
 

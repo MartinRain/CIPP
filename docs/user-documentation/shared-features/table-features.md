@@ -4,16 +4,16 @@ Most list pages in CIPP share the same table component, so the toolbar, filterin
 
 ## Live and Cached Data
 
-Some tables can display either live data, pulled directly from Microsoft Graph, Exchange or another upstream service, or a cached copy held in CIPP's reporting database and refreshed periodically.
+Some tables can display either live data, pulled directly from Microsoft Graph, Exchange or another upstream service, or a cached copy that CIPP stores and refreshes periodically.
 
 The current mode is shown as a chip at the top of the page:
 
 | Chip       | Meaning                                                          |
 | ---------- | ---------------------------------------------------------------- |
 | **Live**   | Data is being retrieved from the upstream service on every load. |
-| **Cached** | Data is being read from CIPP's reporting database.               |
+| **Cached** | Data is being read from CIPP's cached copy.                      |
 
-Where the page supports both modes, clicking the chip switches between them. On pages that only ever read from the reporting database the chip is not clickable, and hovering over it explains why.
+Where the page supports both modes, clicking the chip switches between them. On pages that only ever read cached data the chip is not clickable, and hovering over it explains why.
 
 When the table is in cached mode a **Sync** button appears alongside the chip. This queues a background task to refresh the cache for the selected tenant, and the queue tracker will update the table once the sync completes.
 
@@ -81,6 +81,8 @@ The **Export** button offers several ways to take the data out of CIPP.
 | Export Selected to CSV | Downloads only the rows you have ticked. Shown when at least one row is selected.         |
 | Export Selected to PDF | Produces a PDF of only the rows you have ticked. Shown when at least one row is selected. |
 | View API Response      | Opens a flyout showing the raw JSON returned by the API call behind the table.            |
+
+PDF exports carry the instance's default [branding.md](../cipp/settings/branding.md "mention"): the logo, the report colours, and the footer text and page numbers.
 
 ### Queue Status
 

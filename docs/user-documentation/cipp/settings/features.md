@@ -9,6 +9,8 @@ To change a flag, open the actions menu on its row and choose **Enable Feature**
 | Feature                | Status      | Description                                                                                                                                                      |
 | ---------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | MCP Server             | Beta        | Model Context Protocol (MCP) server endpoint that exposes CIPP's read-only API surface as tools for AI clients. Disabled by default; enable to allow MCP access. |
+| Baselines              | Beta        | The baseline engine that replaces classic Standards and Drift. Enabling it shows the [Baselines](../../tenant/baselines/README.md) pages, hides the classic Standards and Drift pages, and stops their scheduled runs, so the two never run side by side. Disabled by default. |
+| Security Simulations   | Beta        | Plays realistic attacks against a tenant to show what an attacker would experience today and which controls close each gap. Enabling it shows the [Security Simulations](../../tenant/security-simulator/README.md) pages. Disabled by default. |
 
 {% hint style="info" %}
 CIPP maintains further internal flags that are not shown on this page. Those govern behaviour determined by how your instance is hosted rather than by preference, so they are set automatically and cannot be toggled.

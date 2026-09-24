@@ -44,6 +44,15 @@ The expiration action offers **Delete User** and **Disable User** whatever the s
 | Default Usage Location                | The country the account is licensed in. Shown for a new user, and optional.                                                              |
 | Default User                          | The account the elevation is granted to. Shown when the template targets an existing user, and not available on an All Tenants template. |
 
+**Enable Vacation Mode by Default** is also shown when the template targets an existing user, and is not available on an All Tenants template. It pre-sets the Vacation Mode section of the JIT Admin form, which excludes the user from the chosen Conditional Access policies, location-based audit log alerts, or both, for the length of the grant plus a one-hour buffer. See [add.md](../jit-admin/add.md "mention") for what each exclusion does.
+
+| Field                                        | Description                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Conditional Access Policies in _tenant_      | The Conditional Access policies selected by default. Several can be selected, read from the template's tenant. |
+| Exclude from location-based audit log alerts | Turns the audit alert exclusion on by default.                                                               |
+
+Once the default is turned on, the form warns until at least one policy is selected or the audit alert switch is turned on.
+
 {% hint style="info" %}
 Default First Name, Default Last Name, Default Username and Reason Template accept variables for whoever applies the template: `%cipptechnician%` is the part of the signed-in technician's account name before the @ symbol, and `%cipptechnicianupn%` is the whole account name. They are filled in on the JIT Admin page when the template is applied, so a single template such as `jit-%cipptechnician%` names every technician's account after them and keeps the audit trail readable. Typing `%` in any of these fields offers the variables that apply there, and Default Username only offers `%cipptechnician%`, since the domain is added to that field separately. Anything else between percent signs is left as typed.
 {% endhint %}

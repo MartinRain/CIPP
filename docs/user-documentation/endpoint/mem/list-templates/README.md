@@ -31,6 +31,7 @@ Opens a drawer for adding templates to CIPP, with two sources to choose between.
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Display Name | The name of the template.                                                                                                                                                       |
 | Is Synced    | Whether the template came from a community repository and is still linked to it. A template that has been edited or cloned is no longer linked and shows as not synced.         |
+| Synced From  | The repository the template was imported from, shown as owner and repository name. Empty for templates created or cloned in CIPP.                                                 |
 | Package      | The package the template has been tagged with, where one has been assigned. Packages let a standards template pull in a set of templates by tag rather than by naming each one. |
 | Description  | The description recorded against the template.                                                                                                                                  |
 | Type         | The template type, for example Catalog, Device, Admin, AppProtection or deviceCompliancePolicies. This determines how the policy is written when deployed.                      |

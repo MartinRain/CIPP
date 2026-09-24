@@ -1,8 +1,8 @@
 # Add Site
 
-Creates a single new SharePoint site in the selected tenant. Every field shown on this page is required.
+Creates a single new SharePoint site in the selected tenant. Every field shown is required except **Public group**.
 
-## Options
+## SharePoint Site
 
 | Field                | Description                                                                                                                                                                     |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

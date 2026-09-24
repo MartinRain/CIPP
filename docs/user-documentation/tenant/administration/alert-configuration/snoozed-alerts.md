@@ -25,17 +25,17 @@ A snoozed item is still tracked. It keeps its place on the [alert-history](alert
 
 ## Table Details
 
-| Column          | Description                                                                                          |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| Cmdlet Name     | The alert check the snooze applies to.                                                               |
-| Tenant          | The tenant the snoozed item belongs to. A snooze never applies across tenants.                       |
-| Content Preview | A short summary of the specific result that was snoozed, typically the user or object it relates to. |
-| Snooze Reason   | The optional reason recorded when the snooze was set. Empty for snoozes applied from an alert email. |
-| Snoozed By      | The CIPP user who set the snooze.                                                                    |
-| Status          | `Active` while a timed snooze is in effect, `Until Resolved` for a snooze that lifts itself when the item resolves, and `Expired` once a timed snooze has run out. |
-| Remaining Days  | Whole days left before a timed snooze expires, rounded up. Shows `0` once expired, and for until-resolved snoozes. |
-| Until Resolved  | Whether the snooze lifts itself when the alert stops reporting the item.                             |
-| Kept Visible    | Whether the item stays in the dashboard's open list, marked as snoozed, instead of being hidden.      |
+| Column         | Description                                                                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Alert          | The alert check the snooze applies to.                                                                                                                             |
+| Tenant         | The tenant the snoozed item belongs to. A snooze never applies across tenants.                                                                                     |
+| Item           | A short summary of the specific result that was snoozed, typically the user or object it relates to.                                                               |
+| Snooze Reason  | The optional reason recorded when the snooze was set. Empty for snoozes applied from an alert email.                                                               |
+| Snoozed By     | The CIPP user who set the snooze.                                                                                                                                  |
+| Status         | `Active` while a timed snooze is in effect, `Until Resolved` for a snooze that lifts itself when the item resolves, and `Expired` once a timed snooze has run out. |
+| Remaining Days | Whole days left before a timed snooze expires, rounded up. Shows `0` once expired, and for until-resolved snoozes.                                                 |
+| Until Resolved | Whether the snooze lifts itself when the alert stops reporting the item.                                                                                           |
+| Kept Visible   | Whether the item stays in the dashboard's open list, marked as snoozed, instead of being hidden.                                                                   |
 
 {% hint style="info" %}
 Expired snoozes stay listed until they are removed. They no longer suppress anything, so they are safe to leave in place, but clearing them keeps the list readable.

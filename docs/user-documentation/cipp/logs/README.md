@@ -18,12 +18,13 @@ If an expected action is not logged, it might indicate a failure that occurred b
 
 Expanding the **Logbook Filters** section at the top of the page reveals the options for narrowing what is retrieved. The section header shows the date currently in effect, or a summary of the active filters once any are applied.
 
-| Field              | Description                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------ |
-| Select Start Date  | The first day to retrieve entries for. Leave both dates empty to show the current day.     |
-| Select End Date    | The last day to retrieve entries for. Requires a start date, and must fall on or after it. |
-| Filter by Username | Restricts results to entries recorded against a particular user.                           |
-| Filter by Severity | Restricts results to one or more severity levels. Several can be selected at once.         |
+| Field              | Description                                                                                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Select Start Date  | The first day to retrieve entries for. Leave both dates empty to show the current day.                                                                                                                            |
+| Select End Date    | The last day to retrieve entries for. Requires a start date, and must fall on or after it.                                                                                                                        |
+| Filter by Username | Restricts results to entries recorded against a particular user.                                                                                                                                                  |
+| Filter by Severity | Restricts results to one or more severity levels. Several can be selected at once.                                                                                                                                |
+| Filter by API      | Restricts results to entries from particular APIs, matching the **API** column. Type the API names to filter on. Several can be added, and entries from any of them are shown. Part of a name is enough to match. |
 
 | Button        | Description                                                              |
 | ------------- | ------------------------------------------------------------------------ |
@@ -58,13 +59,13 @@ Debug entries are excluded unless you explicitly select Debug in **Filter by Sev
 
 ## Table Actions
 
-<table><thead><tr><th>Action</th><th>Description</th><th data-type="checkbox">Bulk Action Available</th></tr></thead><tbody><tr><td>View Log Entry</td><td>Opens the full logentry.md page for the selected entry, including any associated standard, template or scheduled task details.</td><td>false</td></tr><tr><td>More Info</td><td>Opens the Extended Info flyout with the full details for the selected row.</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Action</th><th>Description</th><th data-type="checkbox">Bulk Action Available</th></tr></thead><tbody><tr><td>View Log Entry</td><td>Opens the full <a data-mention href="logentry.md">logentry.md</a> page for the selected entry, including any associated standard, template or scheduled task details. Selecting a row opens the same page.</td><td>false</td></tr></tbody></table>
 
 ## Logbook Severity
 
 | Severity | Description                                                                                                                                                                                                                                      |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Alert    | A notable event that warrants proactive notification. Entries with this severity come from any alerts set up via alert-configuration.                                                                                                            |
+| Alert    | A notable event that warrants proactive notification. Entries with this severity come from any alerts set up in [alert-configuration](../../tenant/administration/alert-configuration/ "mention").                                                                                                            |
 | Error    | The operation failed. The requested action could not be completed, typically due to an API failure, missing permissions, or an invalid request.                                                                                                  |
 | Info     | The operation completed successfully. Informational messages confirming an action was performed as expected.                                                                                                                                     |
 | Warning  | The operation completed, but with a caveat. Something may need attention even though the action wasn't blocked. Example: resetting a password on a directory-synced user warns that password writeback must be enabled.                          |
