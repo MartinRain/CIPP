@@ -8,6 +8,22 @@ JIT Admin creates administrative accounts that expire on their own, so temporary
 [add.md](add.md)
 {% endcontent-ref %}
 
+## Table Actions
+
+Per-row actions reuse the same Identity User APIs as the Users page, limited to what temporary admin accounts typically need after creation:
+
+| Action | Description |
+| --- | --- |
+| Create Temporary Access Pass | Issues a new TAP when the one from creation has expired. |
+| Re-require MFA registration | Clears registered MFA methods so the account must re-enrol. |
+| Set Per-User MFA | Sets per-user MFA to Enforced, Enabled, or Disabled. |
+| Set Sign In State | Enables or disables sign-in for the account. |
+| Reset Password | Resets the account password. |
+| Require Password Change at Next Logon | Forces a password change without resetting it. |
+| Revoke all user sessions | Signs the account out of all sessions. |
+
+Create Temporary Access Pass is pinned on the row menu so a replacement TAP can be issued without leaving this page.
+
 ## Filters
 
 | Filter            | Shows                                                       |
@@ -31,10 +47,6 @@ JIT Admin creates administrative accounts that expire on their own, so temporary
 
 {% hint style="info" %}
 The JIT columns are not standard Entra ID properties. CIPP stores them in a schema extension on the user object, which is how the elevation details survive between sessions and how the expiry job knows which accounts to act on. An account elevated outside CIPP will not appear here.
-{% endhint %}
-
-{% hint style="info" %}
-This table has no per-row actions. Elevation is granted from the Add JIT Admin page, and ends automatically at the expiry, so there is nothing to act on from the list itself.
 {% endhint %}
 
 {% hint style="warning" %}
