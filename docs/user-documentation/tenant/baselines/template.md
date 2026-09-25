@@ -6,10 +6,6 @@ description: Build a baseline, assign it to tenants and stage its rollout
 
 The editor is where a baseline is given its name, its tenants, and the standards it applies. Standards are organised into stages, and a tenant receives a stage's standards only once it has met that stage's graduation conditions, which lets a baseline roll out gradually rather than all at once.
 
-{% hint style="warning" %}
-Baselines is in beta. Behaviour and screens are still changing between releases.
-{% endhint %}
-
 Leaving the page with unsaved work prompts you to confirm first.
 
 ## Page Actions
