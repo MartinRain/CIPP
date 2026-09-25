@@ -1,0 +1,53 @@
+name: Sync public fork main
+
+on:
+  schedule:
+    - cron: '7 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-fork-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Fast-forward main from CyberDrain/CIPP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out fork main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          git remote add upstream https://github.com/CyberDrain/CIPP.git
+          git fetch --prune origin main
+          git fetch --prune upstream main
+
+      - name: Fast-forward fork main
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FORK_MAIN="$(git rev-parse origin/main)"
+          UPSTREAM_MAIN="$(git rev-parse upstream/main)"
+
+          if [ "$FORK_MAIN" = "$UPSTREAM_MAIN" ]; then
+            echo "MartinRain/CIPP:main already matches CyberDrain/CIPP:main."
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "$FORK_MAIN" "$UPSTREAM_MAIN"; then
+            echo "::error::MartinRain/CIPP:main has diverged from CyberDrain/CIPP:main. Refusing to rewrite it."
+            exit 1
+          fi
+
+          git push origin "upstream/main:refs/heads/main"
