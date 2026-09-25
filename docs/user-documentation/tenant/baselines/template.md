@@ -99,6 +99,8 @@ Three settings are common to every standard.
 
 **Set all standards to** applies any one of those settings across every standard in the stage at once.
 
+**Detect Intune Drift** and **Detect Conditional Access Drift** work differently from other standards. Instead of checking one setting, they raise a deviation for every Intune or Conditional Access policy in the tenant that no baseline template covers. They never change anything automatically, even with automatic fixing turned on. Review each policy on the [Alignment](alignment.md) page, where denying it removes the policy on the next run.
+
 {% hint style="info" %}
 Standards arrive with automatic fixing switched off. Nothing is changed in a tenant until you turn it on, either per standard or with **Set all standards to**.
 {% endhint %}
