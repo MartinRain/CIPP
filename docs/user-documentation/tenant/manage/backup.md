@@ -22,21 +22,21 @@ Choose the tenant the schedule applies to, then switch on the components to incl
 
 Backups run daily from the time the schedule is created. There is no recurrence or start-time option in this flyout.
 
-| Setting                          | Description                                                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Tenant Selection                 | The tenant the schedule applies to, or All Tenants for every tenant.                                                        |
-| User List                        | Backs up the tenant's user accounts and their properties.                                                                   |
-| Groups                           | Backs up groups and their membership.                                                                                       |
-| Conditional Access Configuration | Backs up the tenant's Conditional Access policies.                                                                          |
-| Intune Configuration Policies    | Backs up device configuration profiles.                                                                                     |
-| Intune Compliance Policies       | Backs up device compliance policies.                                                                                        |
-| Intune Protection Policies       | Backs up app protection policies.                                                                                           |
-| Anti-Spam Policies               | Backs up the tenant's anti-spam policies.                                                                                   |
-| Anti-Phishing Policies           | Backs up the tenant's anti-phishing policies.                                                                               |
+| Setting                          | Description                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tenant Selection                 | The tenant the schedule applies to, or All Tenants for every tenant.                                                                              |
+| User List                        | Backs up the tenant's user accounts and their properties.                                                                                         |
+| Groups                           | Backs up groups and their membership.                                                                                                             |
+| Conditional Access Configuration | Backs up the tenant's Conditional Access policies.                                                                                                |
+| Intune Configuration Policies    | Backs up device configuration profiles.                                                                                                           |
+| Intune Compliance Policies       | Backs up device compliance policies.                                                                                                              |
+| Intune Protection Policies       | Backs up app protection policies.                                                                                                                 |
+| Anti-Spam Policies               | Backs up the tenant's anti-spam policies.                                                                                                         |
+| Anti-Phishing Policies           | Backs up the tenant's anti-phishing policies.                                                                                                     |
 | Teams Phone Number Assignments   | Backs up which user or resource account each Teams phone number is assigned to, with its number type, assignment category and emergency location. |
-| Webhook Alerts Configuration     | Backs up the alert webhooks configured in CIPP for the tenant.                                                              |
-| Scripted Alerts Configuration    | Backs up the scripted alerts configured in CIPP for the tenant.                                                             |
-| Custom Variables                 | Backs up the tenant's custom variables. See [global-variables.md](../administration/tenants/global-variables.md "mention"). |
+| Webhook Alerts Configuration     | Backs up the alert webhooks configured in CIPP for the tenant.                                                                                    |
+| Scripted Alerts Configuration    | Backs up the scripted alerts configured in CIPP for the tenant.                                                                                   |
+| Custom Variables                 | Backs up the tenant's custom variables. See [global-variables.md](../administration/tenants/global-variables.md "mention").                       |
 
 ## Backup Schedule Details
 
@@ -79,7 +79,7 @@ Restoring writes the selected components from a backup back into the tenant. The
 | Send Restore results to    | Where the outcome is reported once the restore has run: Webhook, E-mail, or PSA.                                                                      |
 
 {% hint style="info" %}
-Restoring Teams Phone Number Assignments re-assigns each backed-up number to the user or resource account that held it, which also re-enables Enterprise Voice on that account. The account must hold a Teams Phone license before the restore runs. Assignments are submitted to Microsoft asynchronously and can take a minute to appear under Business Voice. A number that is currently assigned to a different account is skipped unless Overwrite existing entries is on, in which case it is moved back.
+Restoring Teams Phone Number Assignments re-assigns each backed-up number to the user or resource account that held it, which also re-enables Enterprise Voice on that account. The account must hold a Teams Phone licence before the restore runs. Restored assignments can take a minute to appear on the [business-voice.md](../../teams-share/teams/business-voice.md "mention") page. A number that is currently assigned to a different account is skipped unless Overwrite existing entries is on, in which case it is moved back.
 {% endhint %}
 
 {% hint style="warning" %}

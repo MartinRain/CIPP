@@ -1,7 +1,5 @@
 ---
 description: Test a set of realistic sign-ins against a tenant's Conditional Access policies without anyone signing in.
-hidden: true
-noIndex: true
 ---
 
 # Sign-in Situations

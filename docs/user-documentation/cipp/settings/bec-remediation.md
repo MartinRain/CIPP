@@ -38,3 +38,5 @@ Until the defaults are saved here for the first time, these six actions are on:
 Every other action starts switched off. The full list of actions and what each one does is under [Containment](../../identity/administration/bec/case.md#containment).
 
 Changing the defaults requires the `CIPP.AppSettings.ReadWrite` permission. Every save is recorded in the logbook with the list of actions that were switched on.
+
+{% include "../../../../.gitbook/includes/feature-request.md" %}

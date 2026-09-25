@@ -10,7 +10,7 @@ On a phone the lower right corner holds the actions for the page you are on, so 
 
 | Option                  | Description                                                                                                                                                      |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tutorials               | Opens the tutorials list, described under [tutorials.md](../../demos/tutorials.md "mention") below.                                                              |
+| Tutorials               | Opens the tutorials list. See [#tutorials](speed-dial.md#tutorials "mention") below.                                                                              |
 | Check the Documentation | Opens [docs.cipp.app](https://docs.cipp.app/) in a new tab, at the page matching the CIPP page you are currently on.                                             |
 | Join the Discord!       | Opens a new tab to join the [CyberDrain Discord server](https://discord.gg/cyberdrain).                                                                          |
 | Request Feature         | Opens a new tab to the GitHub feature request form.                                                                                                              |

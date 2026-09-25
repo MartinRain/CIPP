@@ -43,7 +43,7 @@ The criteria card changes depending on which alert type you selected.
 
 | Field                                         | Description                                                                                                                                                               |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Select an alert preset, or customise your own | Loads a ready-made set of conditions for a common scenario. Once loaded, the conditions can still be edited, or you can skip the preset and build the alert from scratch. |
+| Select an alert preset, or customize your own | Loads a ready-made set of conditions for a common scenario. Once loaded, the conditions can still be edited, or you can skip the preset and build the alert from scratch. |
 | Select the log source                         | The audit log the alert watches, either Azure AD or Exchange. This determines which properties are offered in the condition builder. Required.                            |
 
 Use **Add a condition** to build the rule. Each condition is a property, an operator and an input value, and multiple conditions are combined, so the alert only triggers when all of them match. The delete icon at the end of a row removes that condition.
@@ -58,10 +58,10 @@ Use **Add a condition** to build the rule. Each condition is a property, an oper
 
 With the Azure AD log source, a failed sign-in (operation `UserLoginFailed`) carries two properties that say why it failed:
 
-| Property      | Contains                                                                                                                  | Example                      |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `ErrorNumber` | The AADSTS error code as a number, without the `AADSTS` prefix.                                                           | `53003`                      |
-| `LogonError`  | The name of the same error.                                                                                               | `BlockedByConditionalAccess` |
+| Property      | Contains                                                        | Example                      |
+| ------------- | --------------------------------------------------------------- | ---------------------------- |
+| `ErrorNumber` | The AADSTS error code as a number, without the `AADSTS` prefix. | `53003`                      |
+| `LogonError`  | The name of the same error.                                     | `BlockedByConditionalAccess` |
 
 Both properties offer a picker of the error codes and names Microsoft publishes, so you can search for the error you want rather than typing it. For example, to alert when Conditional Access blocks a sign-in, use either `ErrorNumber` `Equals to` `53003` or `LogonError` `Equals to` `BlockedByConditionalAccess`.
 
@@ -119,6 +119,10 @@ Shown for both alert types when Generate a PSA ticket (or PSA) is one of the sel
 {% hint style="info" %}
 The dropdown is shown disabled with an explanation instead of a priority list when there is nothing valid to offer: no Ticket Type is set on the integration yet, the configured Ticket Type has no SLA attached (so HaloPSA is left to apply its own priority regardless of any selection here), or the priority list could not be loaded.
 {% endhint %}
+
+### BEC containment actions to run
+
+Shown for audit log alerts when Execute a BEC Remediate is one of the selected actions. Choose which containment actions run against the user in the log entry. Each option is listed with its impact level. Leave it empty to run the default set: reset the password, block sign-in, revoke sessions, and disable inbox rules. The instance-wide [bec-remediation.md](../../../cipp/settings/bec-remediation.md "mention") do not change this set. Actions rated Critical run without a typed confirmation when an alert triggers them.
 
 ### Custom Subject
 
