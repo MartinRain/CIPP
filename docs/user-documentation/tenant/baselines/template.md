@@ -67,6 +67,10 @@ Each stage has its own tab. Stage 1 always applies to every assigned tenant, so 
 
 A chip next to the stage name shows how many tenants are currently sitting in that stage.
 
+{% hint style="warning" %}
+Keep a baseline to 30 stages or fewer. The editor lets you add more, but beyond 30 the page can stop responding and crash the browser tab.
+{% endhint %}
+
 ### Graduation Conditions
 
 Add as many conditions as you need. With more than one, a **Condition Logic** field appears and sets whether all of them must match or any one of them is enough. A stage with no conditions can only be advanced into by hand, from the Alignment page.
