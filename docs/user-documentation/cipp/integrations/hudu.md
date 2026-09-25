@@ -50,6 +50,10 @@ Sign in to Hudu as an Administrator, go to **Admin** > **Account Administration*
 Give it a name such as _CIPP Integration_, set **Limit scope to** to _Full Access_, and leave **Company** blank. Enable **Password Access** under **Key can perform the following actions** when synchronising LAPS passwords or BitLocker recovery keys. The other actions are not required.
 
 Optionally restrict **Allowed IP Addresses** to your function app's outbound addresses. CyberDrain-hosted clients can find these at [management.cipp.app](https://management.cipp.app/).
+
+{% hint style="warning" %}
+Hudu's global **IP Access Control** list (**Admin** > **Security**) applies to API keys as well. If it is enabled, add CIPP's outbound addresses there too, even when the key itself allows all IPs, or requests fail with `Unauthorized IP Address`. These addresses can change, so update the list if the integration stops working.
+{% endhint %}
 {% endstep %}
 
 {% step %}
