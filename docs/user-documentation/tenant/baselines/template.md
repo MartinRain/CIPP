@@ -39,7 +39,7 @@ Saving without pushing keeps your changes in CIPP only, and the repository copy 
 | Baseline Name          | The name the baseline is listed under. Required.                                                                                                      |
 | Description            | Free text describing what the baseline is for.                                                                                                        |
 | Assigned Tenants       | The tenants and tenant groups the baseline applies to. Required before the baseline can be saved.                                                     |
-| Excluded Tenants       | Tenants that are left out even though a group or All Tenants assignment would otherwise include them.                                                 |
+| Excluded Tenants       | Tenants and tenant groups that are left out even though a group or All Tenants assignment would otherwise include them. An excluded group leaves out every tenant in it. |
 | Disable Scheduled Runs | Stops the baseline running on its schedule. It then runs only when you run it yourself, and deviations are neither detected nor corrected in between. |
 
 ## Alerting
