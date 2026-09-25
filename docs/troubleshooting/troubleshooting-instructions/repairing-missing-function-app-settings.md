@@ -7,7 +7,7 @@ description: >-
 # Repairing Missing Function App Settings
 
 {% hint style="warning" %}
-This page applies only to the legacy Function App infrastructure, which is supported until 1 January 2027. Self-hosted instances need to move to the new infrastructure before then, see [migrating-to-the-new-infrastructure.md](../../setup/maintaining-cipp/migrating-to-the-new-infrastructure.md "mention").
+This page applies only to the legacy Function App infrastructure, which no longer receives CIPP updates from 1 January 2027. Self-hosted instances need to move to the new infrastructure before then, see [migrating-to-the-new-infrastructure.md](../../setup/maintaining-cipp/migrating-to-the-new-infrastructure.md "mention").
 {% endhint %}
 
 ## Prerequisites
