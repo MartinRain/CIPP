@@ -67,13 +67,13 @@ function Invoke-CIPPBaselineExoRequest {
 
         if ($Step.cmdlet -eq 'Enable-OrganizationCustomization') {
             $OrganizationReady = $false
-            for ($Attempt = 1; $Attempt -le 12; $Attempt++) {
+            for ($Attempt = 1; $Attempt -le 13; $Attempt++) {
                 $StillDehydrated = [bool](New-ExoRequest -tenantid $TenantFilter -cmdlet 'Get-OrganizationConfig' -cmdParams @{} -useSystemMailbox $true -Select IsDehydrated).IsDehydrated
                 if (-not $StillDehydrated) {
                     $OrganizationReady = $true
                     break
                 }
-                if ($Attempt -lt 12) {
+                if ($Attempt -lt 13) {
                     Start-Sleep -Seconds 5
                 }
             }
