@@ -1,0 +1,23 @@
+name: Upstream dev Pester baseline
+
+on:
+  push:
+    branches:
+      - test/upstream-dev-pester-baseline
+
+permissions:
+  contents: read
+
+jobs:
+  pester:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pester 5
+        shell: pwsh
+        run: |
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Install-Module -Name Pester -MinimumVersion 5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Run full backend Pester suite
+        shell: pwsh
+        run: ./backend/Tests/Invoke-CippTests.ps1 -CI
