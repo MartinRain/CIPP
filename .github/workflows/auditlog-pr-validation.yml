@@ -25,6 +25,7 @@ jobs:
         run: |
           Invoke-Pester -Path ./backend/Tests/Standards/Invoke-CIPPStandardAuditLog.Tests.ps1 -CI
 
-      - name: Run full backend Pester suite
+      - name: Run Standards and Baselines Pester suites
         shell: pwsh
-        run: ./backend/Tests/Invoke-CippTests.ps1 -CI
+        run: |
+          Invoke-Pester -Path ./backend/Tests/Standards,./backend/Tests/Baselines -CI
