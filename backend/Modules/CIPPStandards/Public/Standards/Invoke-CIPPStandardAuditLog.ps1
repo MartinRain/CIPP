@@ -74,13 +74,13 @@ function Invoke-CIPPStandardAuditLog {
             # New tenants can remain dehydrated briefly after Enable-OrganizationCustomization
             # returns. Do not immediately run Set-AdminAuditLogConfig, which otherwise fails
             # the first onboarding run with InvalidOperationInDehydratedContextException.
-            for ($Attempt = 1; $Attempt -le 12; $Attempt++) {
+            for ($Attempt = 1; $Attempt -le 13; $Attempt++) {
                 $StillDehydrated = [bool](New-ExoRequest -tenantid $Tenant -cmdlet 'Get-OrganizationConfig' -Select IsDehydrated).IsDehydrated
                 if (-not $StillDehydrated) {
                     $OrganizationReady = $true
                     break
                 }
-                if ($Attempt -lt 12) {
+                if ($Attempt -lt 13) {
                     Start-Sleep -Seconds 5
                 }
             }
