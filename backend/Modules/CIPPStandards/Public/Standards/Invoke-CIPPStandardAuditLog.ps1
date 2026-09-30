@@ -61,20 +61,39 @@ function Invoke-CIPPStandardAuditLog {
 
     if ($Settings.remediate -eq $true) {
         $DehydratedTenant = (New-ExoRequest -tenantid $Tenant -cmdlet 'Get-OrganizationConfig' -Select IsDehydrated).IsDehydrated
+        $OrganizationReady = -not [bool]$DehydratedTenant
         if ($DehydratedTenant -eq $true) {
             try {
                 New-ExoRequest -tenantid $Tenant -cmdlet 'Enable-OrganizationCustomization'
-                Write-LogMessage -API 'Standards' -tenant $tenant -message 'Organization customization enabled.' -sev Info
+                Write-LogMessage -API 'Standards' -tenant $tenant -message 'Organization customization requested.' -sev Info
             } catch {
                 $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
-                Write-LogMessage -API 'Standards' -tenant $tenant -message "Failed to enable organization customization. Error: $ErrorMessage" -sev Debug
+                Write-LogMessage -API 'Standards' -tenant $tenant -message "Enable-OrganizationCustomization returned an error; waiting for organization state before continuing. Error: $ErrorMessage" -sev Debug
+            }
+
+            # New tenants can remain dehydrated briefly after Enable-OrganizationCustomization
+            # returns. Do not immediately run Set-AdminAuditLogConfig, which otherwise fails
+            # the first onboarding run with InvalidOperationInDehydratedContextException.
+            for ($Attempt = 1; $Attempt -le 12; $Attempt++) {
+                $StillDehydrated = [bool](New-ExoRequest -tenantid $Tenant -cmdlet 'Get-OrganizationConfig' -Select IsDehydrated).IsDehydrated
+                if (-not $StillDehydrated) {
+                    $OrganizationReady = $true
+                    break
+                }
+                if ($Attempt -lt 12) {
+                    Start-Sleep -Seconds 5
+                }
+            }
+
+            if (-not $OrganizationReady) {
+                Write-LogMessage -API 'Standards' -tenant $tenant -message 'Organization customization is still provisioning. Unified Audit Log remediation will retry on the next standards run.' -sev Warning
             }
         }
 
         try {
             if ($AuditLogEnabled -eq $true) {
                 Write-LogMessage -API 'Standards' -tenant $tenant -message 'Unified Audit Log already enabled.' -sev Info
-            } else {
+            } elseif ($OrganizationReady) {
                 New-ExoRequest -tenantid $Tenant -cmdlet 'Set-AdminAuditLogConfig' -cmdParams @{UnifiedAuditLogIngestionEnabled = $true }
                 Write-LogMessage -API 'Standards' -tenant $tenant -message 'Unified Audit Log Enabled.' -sev Info
             }
