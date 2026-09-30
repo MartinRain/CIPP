@@ -64,5 +64,23 @@ function Invoke-CIPPBaselineExoRequest {
                 Write-Information "Baselines: $($Step.cmdlet) on $TenantFilter continued past: $($_.Exception.Message)"
             } else { throw }
         }
+
+        if ($Step.cmdlet -eq 'Enable-OrganizationCustomization') {
+            $OrganizationReady = $false
+            for ($Attempt = 1; $Attempt -le 12; $Attempt++) {
+                $StillDehydrated = [bool](New-ExoRequest -tenantid $TenantFilter -cmdlet 'Get-OrganizationConfig' -cmdParams @{} -useSystemMailbox $true -Select IsDehydrated).IsDehydrated
+                if (-not $StillDehydrated) {
+                    $OrganizationReady = $true
+                    break
+                }
+                if ($Attempt -lt 12) {
+                    Start-Sleep -Seconds 5
+                }
+            }
+
+            if (-not $OrganizationReady) {
+                throw "Organization customization is still provisioning for $TenantFilter after 60 seconds."
+            }
+        }
     }
 }
