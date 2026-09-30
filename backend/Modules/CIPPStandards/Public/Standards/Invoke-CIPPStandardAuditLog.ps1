@@ -86,7 +86,7 @@ function Invoke-CIPPStandardAuditLog {
             }
 
             if (-not $OrganizationReady) {
-                Write-LogMessage -API 'Standards' -tenant $tenant -message 'Organization customization is still provisioning. Unified Audit Log remediation will retry on the next standards run.' -sev Warning
+                Write-LogMessage -API 'Standards' -tenant $tenant -message 'Failed to apply Unified Audit Log because Exchange organization customization is still provisioning after 60 seconds. Remediation will retry on the next standards run.' -sev Error
             }
         }
 
