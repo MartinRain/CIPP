@@ -9,17 +9,19 @@ BeforeAll {
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 
     # Stubs mirror the real signatures so signature drift fails loudly here.
-    function New-GraphGetRequest { [CmdletBinding()] param($uri, $tenantid, $AsApp, $ComplexFilter) }
+    function New-GraphGetRequest { [CmdletBinding()] param($uri, $tenantid, $AsApp, [switch]$ComplexFilter) }
     function New-GraphPOSTRequest { [CmdletBinding()] param($uri, $tenantid, $type, $body) }
     function Write-LogMessage { [CmdletBinding()] param($message, $tenant, $API, $tenantId, $headers, $user, $sev, $Sev2, $LogData) }
     function Get-CippException { [CmdletBinding()] param($Exception) }
 
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPIntuneAssignmentTarget.ps1')
+    . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Resolve-CIPPIntuneMamAllUsersGroupId.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Set-CIPPAssignedPolicy.ps1')
 
     $script:Tenant = 'contoso.onmicrosoft.com'
     $script:SalesId = '11111111-1111-1111-1111-111111111111'
     $script:AllUsersGroupId = 'acacacac-9df4-4c7d-9d50-4ef0226f57a9'
+    $script:MamAllUsersGroupId = '55555555-5555-5555-5555-555555555555'
 }
 
 Describe 'Set-CIPPAssignedPolicy' {
@@ -28,7 +30,18 @@ Describe 'Set-CIPPAssignedPolicy' {
         Mock -CommandName Get-CippException -MockWith {
             [PSCustomObject]@{ NormalizedError = 'Graph said no' }
         }
-        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*/groups?*' } -MockWith {
+        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*membershipRule eq ''All Users''*' } -MockWith {
+            @([PSCustomObject]@{
+                id = $script:MamAllUsersGroupId
+                displayName = 'Tous les utilisateurs'
+                groupTypes = @('DynamicMembership')
+                membershipRule = 'All Users'
+                membershipRuleProcessingState = 'On'
+                securityEnabled = $true
+                mailEnabled = $false
+            })
+        }
+        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*/groups?*' -and $uri -notlike '*membershipRule eq ''All Users''*' } -MockWith {
             @([PSCustomObject]@{ id = $script:SalesId; displayName = 'Sales Users' })
         }
         Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*/assignments' } -MockWith { @() }
@@ -132,7 +145,7 @@ Describe 'Set-CIPPAssignedPolicy' {
                 $Sent = ($body | ConvertFrom-Json).assignments
                 @($Sent).Count -eq 1 -and
                 $Sent.target.'@odata.type' -eq '#microsoft.graph.groupAssignmentTarget' -and
-                $Sent.target.groupId -eq $script:AllUsersGroupId
+                $Sent.target.groupId -eq $script:MamAllUsersGroupId
             }
         }
 
@@ -140,7 +153,7 @@ Describe 'Set-CIPPAssignedPolicy' {
             $null = Set-CIPPAssignedPolicy -GroupName 'allLicensedUsers' -PolicyId 'policy-1' -Type 'androidManagedAppProtection' -PlatformType 'deviceAppManagement' -TenantFilter $script:Tenant
 
             Should -Invoke New-GraphPOSTRequest -Times 1 -Exactly -ParameterFilter {
-                ($body | ConvertFrom-Json).assignments.target.groupId -eq $script:AllUsersGroupId
+                ($body | ConvertFrom-Json).assignments.target.groupId -eq $script:MamAllUsersGroupId
             }
         }
 
@@ -160,7 +173,7 @@ Describe 'Set-CIPPAssignedPolicy' {
 
             Should -Invoke New-GraphPOSTRequest -Times 1 -Exactly -ParameterFilter {
                 $Sent = ($body | ConvertFrom-Json).assignments
-                @($Sent).Count -eq 1 -and $Sent.target.groupId -eq $script:AllUsersGroupId
+                @($Sent).Count -eq 1 -and $Sent.target.groupId -eq $script:MamAllUsersGroupId
             }
             Should -Invoke Write-LogMessage -Times 1 -Exactly -ParameterFilter { $sev -eq 'Warning' -and $message -like "*'All Devices'*" }
         }

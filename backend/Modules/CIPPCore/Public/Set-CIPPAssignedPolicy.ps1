@@ -61,6 +61,10 @@ function Set-CIPPAssignedPolicy {
                 # behind App Protection takes only group targets. Both this and the assignment
                 # comparison resolve it through the same helper so they cannot disagree.
                 $BroadTarget = Get-CIPPIntuneAssignmentTarget -AssignTo $GroupName -PolicyType $Type
+                if ($BroadTarget.IsMam -and $GroupName -in @('allLicensedUsers', 'AllDevicesAndUsers')) {
+                    $MamAllUsersGroupId = Resolve-CIPPIntuneMamAllUsersGroupId -TenantFilter $TenantFilter -PolicyType $Type -AssignTo $GroupName
+                    $BroadTarget = Get-CIPPIntuneAssignmentTarget -AssignTo $GroupName -PolicyType $Type -MamAllUsersGroupId $MamAllUsersGroupId
+                }
                 if ($BroadTarget.Unsupported) {
                     Write-LogMessage -headers $Headers -API $APIName -message $BroadTarget.Unsupported -sev 'Error' -tenant $TenantFilter
                     throw $BroadTarget.Unsupported

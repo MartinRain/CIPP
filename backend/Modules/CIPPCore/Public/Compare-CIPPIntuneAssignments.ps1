@@ -103,6 +103,10 @@ function Compare-CIPPIntuneAssignments {
         # Read the broad targets through the same helper remediation writes them with, so a policy
         # type that expresses one of them differently is expected the way it is actually applied.
         $BroadTarget = Get-CIPPIntuneAssignmentTarget -AssignTo $Target.AssignTo -PolicyType $PolicyType
+        if ($BroadTarget.IsMam -and $Target.AssignTo -in @('allLicensedUsers', 'AllDevicesAndUsers')) {
+            $MamAllUsersGroupId = Resolve-CIPPIntuneMamAllUsersGroupId -TenantFilter $TenantFilter -PolicyType $PolicyType -AssignTo $Target.AssignTo
+            $BroadTarget = Get-CIPPIntuneAssignmentTarget -AssignTo $Target.AssignTo -PolicyType $PolicyType -MamAllUsersGroupId $MamAllUsersGroupId
+        }
         $ExpectedIncludeTypes = if ($Target.AssignTo -eq 'customGroup') {
             @($GroupType)
         } else {

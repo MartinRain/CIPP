@@ -12,10 +12,11 @@ BeforeAll {
     $RepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 
     # Minimal stub so Mock has a command to replace
-    function New-GraphGetRequest { param($uri, $tenantid, $AsApp, $ComplexFilter) }
+    function New-GraphGetRequest { param($uri, $tenantid, $AsApp, [switch]$ComplexFilter) }
 
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPIntuneAssignTarget.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPIntuneAssignmentTarget.ps1')
+    . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Resolve-CIPPIntuneMamAllUsersGroupId.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Compare-CIPPIntuneAssignments.ps1')
 
     $script:Tenant = 'contoso.onmicrosoft.com'
@@ -23,6 +24,7 @@ BeforeAll {
     $script:PilotId = '22222222-2222-2222-2222-222222222222'
     $script:ContractorsId = '33333333-3333-3333-3333-333333333333'
     $script:FilterId = '44444444-4444-4444-4444-444444444444'
+    $script:MamAllUsersGroupId = '55555555-5555-5555-5555-555555555555'
 
     function New-GroupAssignment {
         param($GroupId, $FilterId, $FilterType)
@@ -57,7 +59,18 @@ BeforeAll {
 
 Describe 'Compare-CIPPIntuneAssignments' {
     BeforeEach {
-        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*/groups?*' } -MockWith {
+        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*membershipRule eq ''All Users''*' } -MockWith {
+            @([PSCustomObject]@{
+                id = $script:MamAllUsersGroupId
+                displayName = 'Tous les utilisateurs'
+                groupTypes = @('DynamicMembership')
+                membershipRule = 'All Users'
+                membershipRuleProcessingState = 'On'
+                securityEnabled = $true
+                mailEnabled = $false
+            })
+        }
+        Mock -CommandName New-GraphGetRequest -ParameterFilter { $uri -like '*/groups?*' -and $uri -notlike '*membershipRule eq ''All Users''*' } -MockWith {
             @(
                 [PSCustomObject]@{ id = $script:SalesId; displayName = 'Sales Users' }
                 [PSCustomObject]@{ id = $script:PilotId; displayName = 'Pilot Users' }
@@ -229,12 +242,8 @@ Describe 'Compare-CIPPIntuneAssignments' {
     Context 'broad targets on an App Protection policy' {
         # Remediation cannot write an allLicensedUsers target here - the MAM service rejects it -
         # so expecting one would be a deviation no run could ever clear.
-        BeforeAll {
-            $script:AllUsersGroupId = 'acacacac-9df4-4c7d-9d50-4ef0226f57a9'
-        }
-
         It 'matches the group assignment remediation actually writes for all users' {
-            $Existing = @(New-GroupAssignment -GroupId $script:AllUsersGroupId)
+            $Existing = @(New-GroupAssignment -GroupId $script:MamAllUsersGroupId)
 
             $Result = Compare-CIPPIntuneAssignments -ExistingAssignments $Existing -ExpectedAssignTo 'allLicensedUsers' -PolicyType 'AppProtection' -TenantFilter $script:Tenant
 
@@ -247,11 +256,11 @@ Describe 'Compare-CIPPIntuneAssignments' {
 
             $Result.Matched | Should -BeFalse
             $Result.MissingIncludeGroups.displayName | Should -Be 'All Users'
-            $Result.Reasons -join '; ' | Should -Not -BeLike "*$script:AllUsersGroupId*"
+            $Result.Reasons -join '; ' | Should -Not -BeLike "*$script:MamAllUsersGroupId*"
         }
 
         It 'does not demand an allLicensedUsers target that cannot be written' {
-            $Existing = @(New-GroupAssignment -GroupId $script:AllUsersGroupId)
+            $Existing = @(New-GroupAssignment -GroupId $script:MamAllUsersGroupId)
 
             $Result = Compare-CIPPIntuneAssignments -ExistingAssignments $Existing -ExpectedAssignTo 'allLicensedUsers' -PolicyType 'iosManagedAppProtections' -TenantFilter $script:Tenant
 
@@ -259,7 +268,7 @@ Describe 'Compare-CIPPIntuneAssignments' {
         }
 
         It 'expects only the users half of AllDevicesAndUsers, matching what remediation applies' {
-            $Existing = @(New-GroupAssignment -GroupId $script:AllUsersGroupId)
+            $Existing = @(New-GroupAssignment -GroupId $script:MamAllUsersGroupId)
 
             (Compare-CIPPIntuneAssignments -ExistingAssignments $Existing -ExpectedAssignTo 'AllDevicesAndUsers' -PolicyType 'AppProtection' -TenantFilter $script:Tenant).Matched |
                 Should -BeTrue
@@ -267,7 +276,7 @@ Describe 'Compare-CIPPIntuneAssignments' {
 
         It 'still reports a group the standard does not expect' {
             $Existing = @(
-                New-GroupAssignment -GroupId $script:AllUsersGroupId
+                New-GroupAssignment -GroupId $script:MamAllUsersGroupId
                 New-GroupAssignment -GroupId $script:PilotId
             )
 

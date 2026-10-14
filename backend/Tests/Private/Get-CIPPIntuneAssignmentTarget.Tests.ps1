@@ -10,6 +10,7 @@ BeforeAll {
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPIntuneAssignmentTarget.ps1')
 
     $script:AllUsersGroupId = 'acacacac-9df4-4c7d-9d50-4ef0226f57a9'
+    $script:MamAllUsersGroupId = '55555555-5555-5555-5555-555555555555'
 }
 
 Describe 'Get-CIPPIntuneAssignmentTarget' {
@@ -58,19 +59,19 @@ Describe 'Get-CIPPIntuneAssignmentTarget' {
                 Should -BeFalse
         }
 
-        It 'expresses all users as a group assignment on the All Users virtual group' {
-            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'allLicensedUsers' -PolicyType 'iosManagedAppProtections'
+        It 'expresses all users as a group assignment on the caller-resolved tenant group' {
+            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'allLicensedUsers' -PolicyType 'iosManagedAppProtections' -MamAllUsersGroupId $script:MamAllUsersGroupId
 
             @($Result.Targets).Count | Should -Be 1
             $Result.Targets[0].'@odata.type' | Should -Be '#microsoft.graph.groupAssignmentTarget'
-            $Result.Targets[0].groupId | Should -Be $script:AllUsersGroupId
+            $Result.Targets[0].groupId | Should -Be $script:MamAllUsersGroupId
             $Result.Unsupported | Should -BeNullOrEmpty
         }
 
-        It 'names the virtual group so it is not reported as a bare GUID' {
-            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'allLicensedUsers' -PolicyType 'iosManagedAppProtections'
+        It 'names the resolved tenant group so it is not reported as a bare GUID' {
+            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'allLicensedUsers' -PolicyType 'iosManagedAppProtections' -MamAllUsersGroupId $script:MamAllUsersGroupId
 
-            $Result.GroupNames[$script:AllUsersGroupId] | Should -Be 'All Users'
+            $Result.GroupNames[$script:MamAllUsersGroupId] | Should -Be 'All Users'
         }
 
         It 'reports All Devices as unsupported rather than guessing an audience' {
@@ -81,10 +82,10 @@ Describe 'Get-CIPPIntuneAssignmentTarget' {
         }
 
         It 'keeps the users half of AllDevicesAndUsers and reports the dropped half' {
-            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'AllDevicesAndUsers' -PolicyType 'androidManagedAppProtections'
+            $Result = Get-CIPPIntuneAssignmentTarget -AssignTo 'AllDevicesAndUsers' -PolicyType 'androidManagedAppProtections' -MamAllUsersGroupId $script:MamAllUsersGroupId
 
             @($Result.Targets).Count | Should -Be 1
-            $Result.Targets[0].groupId | Should -Be $script:AllUsersGroupId
+            $Result.Targets[0].groupId | Should -Be $script:MamAllUsersGroupId
             $Result.Unsupported | Should -BeNullOrEmpty
             $Result.Dropped | Should -Be @('All Devices')
         }

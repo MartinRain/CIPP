@@ -14,8 +14,9 @@ function Get-CIPPIntuneAssignmentTarget {
         the device management service, and it accepts only groupAssignmentTarget and
         exclusionGroupAssignmentTarget - an assign carrying allLicensedUsersAssignmentTarget or
         allDevicesAssignmentTarget is rejected outright. "All users" is expressed there as a group
-        assignment against Intune's well-known All Users virtual group, which is what the portal's
-        "Add all users" writes. A MAM policy protects a user's apps and has no device audience at
+        assignment. For direct MAM assignments the portal targets the tenant-specific Entra dynamic
+        security group whose membershipRule is "All Users"; callers pass that resolved group id into
+        this helper. A MAM policy protects a user's apps and has no device audience at
         all, so All Devices has no equivalent and is reported as unsupported rather than guessed at.
 
         Device Preparation profiles (Autopilot device preparation) have the same shape for a
@@ -56,12 +57,14 @@ function Get-CIPPIntuneAssignmentTarget {
     [CmdletBinding()]
     param(
         [string]$AssignTo,
-        [string]$PolicyType
+        [string]$PolicyType,
+        [string]$MamAllUsersGroupId
     )
 
-    # Intune's well-known virtual group for "all users", the only way to express it on a policy
-    # type whose assignment surface is groups only (MAM, Device Preparation).
-    $MamAllUsersGroupId = 'acacacac-9df4-4c7d-9d50-4ef0226f57a9'
+    # Device Preparation and Apple enrollment still use Intune's well-known All Users virtual
+    # group. Direct MAM/App Protection assignments are different: callers resolve the tenant's
+    # dynamic All Users security group and pass its id through MamAllUsersGroupId.
+    $VirtualAllUsersGroupId = 'acacacac-9df4-4c7d-9d50-4ef0226f57a9'
 
     $MamPolicyTypes = @(
         'AppProtection'
@@ -83,8 +86,14 @@ function Get-CIPPIntuneAssignmentTarget {
     )
     $IsUserGroupOnly = $IsMam -or ($UserGroupOnlyTypes -contains $PolicyType)
 
+    $EffectiveAllUsersGroupId = if ($IsMam -and $MamAllUsersGroupId) {
+        $MamAllUsersGroupId
+    } else {
+        $VirtualAllUsersGroupId
+    }
+
     $AllUsersTarget = if ($IsUserGroupOnly) {
-        @{ '@odata.type' = '#microsoft.graph.groupAssignmentTarget'; groupId = $MamAllUsersGroupId }
+        @{ '@odata.type' = '#microsoft.graph.groupAssignmentTarget'; groupId = $EffectiveAllUsersGroupId }
     } else {
         @{ '@odata.type' = '#microsoft.graph.allLicensedUsersAssignmentTarget' }
     }
@@ -119,18 +128,19 @@ function Get-CIPPIntuneAssignmentTarget {
         }
     }
 
-    # Virtual groups are not in the directory, so a lookup by id finds nothing to name them with.
+    # Give broad group targets a stable friendly name for drift output. MAM may point at a real,
+    # localized Entra group, so do not derive this label from the directory displayName.
     $GroupNames = @{}
-    if ($Targets.groupId -contains $MamAllUsersGroupId) {
-        $GroupNames[$MamAllUsersGroupId] = 'All Users'
+    if ($Targets.groupId -contains $EffectiveAllUsersGroupId) {
+        $GroupNames[$EffectiveAllUsersGroupId] = 'All Users'
     }
 
     # Outside MAM, the device management service reports an All Users group assignment back as
     # allLicensedUsersAssignmentTarget, so both shapes describe the same working assignment and the
     # comparison must accept either. The MAM service rejects that type outright, so it stays out.
     $Equivalents = @{}
-    if (-not $IsMam -and $Targets.groupId -contains $MamAllUsersGroupId) {
-        $Equivalents[$MamAllUsersGroupId] = @('#microsoft.graph.allLicensedUsersAssignmentTarget')
+    if (-not $IsMam -and $Targets.groupId -contains $VirtualAllUsersGroupId) {
+        $Equivalents[$VirtualAllUsersGroupId] = @('#microsoft.graph.allLicensedUsersAssignmentTarget')
     }
 
     [PSCustomObject]@{
