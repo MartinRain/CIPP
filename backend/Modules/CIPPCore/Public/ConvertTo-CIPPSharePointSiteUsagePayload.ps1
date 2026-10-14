@@ -46,6 +46,7 @@ function ConvertTo-CIPPSharePointSiteUsagePayload {
         archivedFileDiskUsedBytes     = $Site.archivedFileDiskUsedBytes
         archivedFileDiskUsedGigabytes = $ArchiveGb
         allowFileArchive              = $Site.allowFileArchive
+        versionPolicy                 = if ($Site.versionPolicy) { $Site.versionPolicy } else { 'Unknown' }
         AutoMapUrl                    = $Site.AutoMapUrl
     }
 

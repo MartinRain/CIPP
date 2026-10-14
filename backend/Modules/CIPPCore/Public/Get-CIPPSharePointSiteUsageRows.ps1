@@ -85,11 +85,21 @@ function Get-CIPPSharePointSiteUsageRows {
     $ArchiveByUrl = [System.Collections.Generic.Dictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
     if ($IncludeArchive) {
         try {
-            foreach ($SpoSite in @(Get-CIPPSPOSite -TenantFilter $TenantFilter -UseCertificate -Properties 'ArchivedFileDiskUsed', 'AllowFileArchive')) {
+            foreach ($SpoSite in @(Get-CIPPSPOSite -TenantFilter $TenantFilter -UseCertificate -Properties 'ArchivedFileDiskUsed', 'AllowFileArchive', 'InheritVersionPolicyFromTenant', 'EnableAutoExpirationVersionTrim')) {
                 if ([string]::IsNullOrWhiteSpace($SpoSite.Url)) { continue }
+                $InheritPolicy = $null
+                $AutoTrim = $null
+                if ($null -ne $SpoSite.InheritVersionPolicyFromTenant) {
+                    try { $InheritPolicy = [System.Convert]::ToBoolean($SpoSite.InheritVersionPolicyFromTenant) } catch { }
+                }
+                if ($null -ne $SpoSite.EnableAutoExpirationVersionTrim) {
+                    try { $AutoTrim = [System.Convert]::ToBoolean($SpoSite.EnableAutoExpirationVersionTrim) } catch { }
+                }
                 $ArchiveByUrl[$SpoSite.Url.TrimEnd('/').ToLowerInvariant()] = @{
                     archivedFileDiskUsedBytes = $SpoSite.ArchivedFileDiskUsed
                     allowFileArchive          = $SpoSite.AllowFileArchive
+                    versionPolicyInherited    = $InheritPolicy
+                    versionPolicyAutoTrim     = $AutoTrim
                 }
             }
         } catch {
@@ -147,6 +157,8 @@ function Get-CIPPSharePointSiteUsageRows {
                 $ListingItem | Add-Member -NotePropertyMembers ([ordered]@{
                         archivedFileDiskUsedBytes = $ArchiveFields.archivedFileDiskUsedBytes
                         allowFileArchive          = $ArchiveFields.allowFileArchive
+                        versionPolicyInherited    = $ArchiveFields.versionPolicyInherited
+                        versionPolicyAutoTrim     = $ArchiveFields.versionPolicyAutoTrim
                     }) -Force
             }
         }

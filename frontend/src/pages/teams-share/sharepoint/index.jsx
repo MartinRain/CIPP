@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Layout as DashboardLayout } from '../../../layouts/index'
 import { CippIcons } from '../../../utils/icon-registry'
 import { CippTablePage } from '../../../components/CippComponents/CippTablePage.jsx'
@@ -18,6 +19,7 @@ import { CippLibraryPermissionsDialog } from '../../../components/CippComponents
 import { CippCheckUserAccessDialog } from '../../../components/CippComponents/CippCheckUserAccessDialog'
 import { CippSharePointQuotaCard } from '../../../components/CippCards/CippSharePointQuotaCard'
 import { CippSharePointVersionCleanupFields } from '../../../components/CippComponents/CippSharePointVersionCleanupFields'
+import { CippEditGlobalVersionPolicyDialog } from '../../../components/CippComponents/CippEditGlobalVersionPolicyDialog'
 import {
   CippAnonymizedReportAlert,
   isReportAnonymized,
@@ -145,8 +147,10 @@ const VersionCleanupStatusModal = ({ row, tenantFilter, drawerVisible, setDrawer
 const Page = () => {
   const pageTitle = 'SharePoint Sites'
   const tenantFilter = useSettings().currentTenant
+  const [globalPolicyOpen, setGlobalPolicyOpen] = useState(false)
   const { checkPermissions } = usePermissions()
   const canWriteSite = checkPermissions(['Sharepoint.Site.ReadWrite'])
+  const canReadSharePointAdmin = checkPermissions(['Sharepoint.Admin.Read', 'Sharepoint.Admin.ReadWrite'])
   const canReadSite = checkPermissions(['Sharepoint.Site.Read', 'Sharepoint.Site.ReadWrite'])
   const canReadRecycleBin = checkPermissions([
     'Sharepoint.SiteRecycleBin.Read',
@@ -742,6 +746,7 @@ const Page = () => {
     'ownerPrincipalName',
     'lastActivityDate',
     'fileCount',
+    ...(reportDB.useReportDB ? ['versionPolicy'] : []),
     'storageUsedInGigabytes',
     'storageAllocatedInGigabytes',
     'reportRefreshDate',
@@ -753,6 +758,11 @@ const Page = () => {
     <Stack direction="row" spacing={1} sx={{
       alignItems: "center"
     }}>
+      {canReadSharePointAdmin && tenantFilter && tenantFilter !== 'AllTenants' && (
+        <Button onClick={() => setGlobalPolicyOpen(true)} startIcon={<CippIcons.Settings />}>
+          Edit Global Version Policy
+        </Button>
+      )}
       <Button component={Link} href="/teams-share/sharepoint/add-site" startIcon={<CippIcons.Add />}>
         Add Site
       </Button>
@@ -796,6 +806,12 @@ const Page = () => {
             )}
           </>
         }
+      />
+      <CippEditGlobalVersionPolicyDialog
+        key={tenantFilter}
+        open={globalPolicyOpen}
+        onClose={() => setGlobalPolicyOpen(false)}
+        tenantFilter={tenantFilter}
       />
       {reportDB.syncDialog}
     </>

@@ -31,7 +31,8 @@ BeforeAll {
     function New-ExoRequest { param($cmdlet, $cmdParams, $Select, $Anchor, $useSystemMailbox, $tenantid, $NoAuthCheck, [switch]$Compliance, $ApiVersion, $ModuleVersion, [switch]$AsApp, [switch]$UseCertificate, [switch]$StreamPages) }
     function Test-CIPPStandardLicense { param($StandardName, $TenantFilter, $Preset, [switch]$SkipLog) }
     function Get-Tenants { param($TenantFilter, [switch]$IncludeErrors) }
-    function Get-CIPPSPOSite { param($TenantFilter, $SiteUrl) @() }
+    function Get-CIPPSPOSite { param($TenantFilter, $SiteUrl, [string[]]$Properties, [switch]$UseCertificate) @() }
+    function Get-CIPPDbItem { param($TenantFilter, $Type) @() }
     function Get-SharePointAdminLink { param($Public, $tenantFilter) [PSCustomObject]@{ AdminUrl = 'https://contoso-admin.sharepoint.com'; SharePointUrl = 'https://contoso.sharepoint.com' } }
     function Get-CIPPSPOAdminListData { param($TenantFilter, $AdminUrl, $Type) @() }
     function Update-CippQueueEntry { param($RowKey, $TotalTasks, [switch]$IncrementTotalTasks) }
@@ -86,6 +87,7 @@ BeforeAll {
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPAutoExpandingArchiveState.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/ConvertTo-SPOUsageRootWebTemplate.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Get-CIPPSharePointSiteUsageRows.ps1')
+    . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/ConvertTo-CIPPSharePointSiteUsagePayload.ps1')
     . (Join-Path $RepoRoot 'Modules/CIPPCore/Public/Start-CIPPMailboxDataStage.ps1')
 
     . (Get-CollectorPath 'Set-CIPPDBCacheGroups')
@@ -396,6 +398,50 @@ Describe 'DBCache collectors reworked for bounded memory' {
             ($Listing | Where-Object id -EQ 's1').allowFileArchive | Should -BeTrue
             ($Listing | Where-Object id -EQ 's2').archivedFileDiskUsedBytes | Should -Be 0
             ($Listing | Where-Object id -EQ 's2').allowFileArchive | Should -BeFalse
+        }
+
+        It 'resolves inherited and customized versioning from the existing tenant cache' {
+            Mock -CommandName Get-CIPPSPOSite -MockWith {
+                @(
+                    [pscustomobject]@{ Url = 'https://c/s1'; InheritVersionPolicyFromTenant = $true; EnableAutoExpirationVersionTrim = $true }
+                    [pscustomobject]@{ Url = 'https://c/s2'; InheritVersionPolicyFromTenant = $false; EnableAutoExpirationVersionTrim = $true }
+                )
+            }
+            Mock -CommandName Get-CIPPDbItem -MockWith {
+                [pscustomobject]@{ RowKey = 'SPOTenant-1'; Data = '{"EnableAutoExpirationVersionTrim":false}' }
+            }
+            Set-CIPPDBCacheSharePointSiteUsage -TenantFilter 'contoso.com'
+            $Listing = ($script:DbWrites | Where-Object Type -EQ 'SharePointSiteListing').Rows
+            ($Listing | Where-Object id -EQ 's1').versionPolicy | Should -Be 'Manual (Inherited)'
+            ($Listing | Where-Object id -EQ 's2').versionPolicy | Should -Be 'Automatic'
+            Should -Invoke Get-CIPPSPOSite -Times 1 -Exactly -ParameterFilter {
+                $UseCertificate -and $Properties -contains 'InheritVersionPolicyFromTenant' -and
+                $Properties -contains 'EnableAutoExpirationVersionTrim'
+            }
+            Should -Invoke Get-CIPPDbItem -Times 1 -Exactly
+            (ConvertTo-CIPPSharePointSiteUsagePayload -Site $Listing[0] -SiteUsage $null).versionPolicy | Should -Be 'Manual (Inherited)'
+        }
+
+        It 'displays Automatic (Inherited) when the cached tenant policy enables auto trim' {
+            Mock -CommandName Get-CIPPSPOSite -MockWith {
+                @([pscustomobject]@{ Url = 'https://c/s1'; InheritVersionPolicyFromTenant = $true; EnableAutoExpirationVersionTrim = $false })
+            }
+            Mock -CommandName Get-CIPPDbItem -MockWith {
+                [pscustomobject]@{ RowKey = 'SPOTenant-1'; Data = '{"EnableAutoExpirationVersionTrim":true}' }
+            }
+            Set-CIPPDBCacheSharePointSiteUsage -TenantFilter 'contoso.com'
+            $Listing = ($script:DbWrites | Where-Object Type -EQ 'SharePointSiteListing').Rows
+            ($Listing | Where-Object id -EQ 's1').versionPolicy | Should -Be 'Automatic (Inherited)'
+        }
+
+        It 'preserves unknown when the tenant cache is missing' {
+            Mock -CommandName Get-CIPPSPOSite -MockWith {
+                @([pscustomobject]@{ Url = 'https://c/s1'; InheritVersionPolicyFromTenant = $true; EnableAutoExpirationVersionTrim = $false })
+            }
+            Set-CIPPDBCacheSharePointSiteUsage -TenantFilter 'contoso.com'
+            $Listing = ($script:DbWrites | Where-Object Type -EQ 'SharePointSiteListing').Rows
+            ($Listing | Where-Object id -EQ 's1').versionPolicy | Should -Be 'Inherited (Unknown)'
+            ($Listing | Where-Object id -EQ 's2').versionPolicy | Should -Be 'Unknown'
         }
     }
 
