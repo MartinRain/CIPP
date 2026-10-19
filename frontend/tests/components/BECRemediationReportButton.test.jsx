@@ -49,8 +49,8 @@ describe('BECRemediationReportButton branding defaults', () => {
   it('sends the full preset then the summary preset when the variant changes', async () => {
     const user = userEvent.setup()
     renderButton()
-    await user.click(screen.getByRole('button', { name: 'Generate PDF Report' }))
-    const dialog = await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /Generate (BEC Remediation Report PDF|PDF Report)/i }))
+    await screen.findByRole('dialog')
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
     expect(lastParams().get('brandingPresetId')).toBe('preset-full')
 
