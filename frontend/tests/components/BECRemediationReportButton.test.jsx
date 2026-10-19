@@ -62,7 +62,7 @@ describe('BECRemediationReportButton branding defaults', () => {
   it('falls back to default branding when BEC defaults are unset', async () => {
     api.get = () => getResult({ data: { reportDefaults: {} } })
     renderButton()
-    await userEvent.click(screen.getByRole('button', { name: 'Generate PDF Report' }))
+    await userEvent.click(screen.getByRole('button', { name: /Generate (BEC Remediation Report PDF|PDF Report)/i }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
     expect(lastParams().get('brandingPresetId')).toBe('')
   })
