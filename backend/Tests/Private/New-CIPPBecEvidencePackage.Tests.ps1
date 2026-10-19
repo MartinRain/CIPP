@@ -129,7 +129,16 @@ Describe 'New-CIPPBecEvidencePackage' {
         $Log = [System.Text.Encoding]::UTF8.GetString($Entries['logbook.json'])
         $Log | Should -Not -Match 'Hunter2'
         $Log | Should -Match '\[redacted\]'
-        Should -Invoke Get-CIPPAzDataTableEntity -Times 1 -ParameterFilter { $Filter -like "BecCaseId eq 'BEC-20260820120000-ev0001'*" -and $Filter -like "*PartitionKey ge '20260819'*" }
+        # The log query starts one day before the run, but never earlier than 60 days ago.
+        # Derive the expected partition at runtime so this test does not expire as the fixture ages.
+        $ExpectedFrom = ([datetime]$script:Run.RequestedAt).ToUniversalTime().AddDays(-1)
+        $RetentionFloor = [datetime]::UtcNow.AddDays(-60)
+        if ($ExpectedFrom -lt $RetentionFloor) { $ExpectedFrom = $RetentionFloor }
+        $ExpectedPartition = $ExpectedFrom.ToString('yyyyMMdd')
+        Should -Invoke Get-CIPPAzDataTableEntity -Times 1 -ParameterFilter {
+            $Filter -like "BecCaseId eq 'BEC-20260820120000-ev0001'*" -and
+            $Filter -like "*PartitionKey ge '$ExpectedPartition'*"
+        }
     }
 
     It 'refuses an incomplete run' {
